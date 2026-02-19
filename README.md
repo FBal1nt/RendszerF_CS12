@@ -1,2 +1,2 @@
 # RendszerF_CS12
-Rendszer fejlesztés 12-es csapat
+Rendszerfejlesztés 12-es csapat
