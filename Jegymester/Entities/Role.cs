@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Jegymester.Entities
 {
-    public class Szerepkor
+    public class Role
     {
         public int Id { get; set; }
 

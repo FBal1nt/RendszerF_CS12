@@ -1,6 +1,6 @@
 ﻿using System;
 
-public class Jegy
+public class Ticket
 {
 	
 }
