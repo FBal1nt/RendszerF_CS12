@@ -10,4 +10,5 @@ public class Felhasznalo
     public IEnumerable<Jegyvasarlas> Jegyvasarlasok { get; set; } = new List<Jegyvasarlas>();
     public IEnumerable<Berlet> Berletek { get; set; } = new List<Berlet>();
     public IEnumerable<Szerepkor> Szerepkorok { get; set; } = new List<Szerepkor>();
+    public IEnumerable<Vetites> Vetitesek { get; set; } = new List<Vetites>();
 }
