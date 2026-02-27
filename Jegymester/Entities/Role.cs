@@ -12,6 +12,6 @@ namespace Jegymester.Entities
 
         public string Name { get; set; }
 
-        public IEnumerable<Felhasznalo> Felhasznalok { get; set; } = new List<Felhasznalo>();
+        public IEnumerable<User> Felhasznalok { get; set; } = new List<User>();
     }
 }
