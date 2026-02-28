@@ -6,7 +6,7 @@ public class Screening
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
     public int FilmId { get; set; }
-    public List<User> Felhasznalok { get; set; } = new List<User>();
+    public List<User> Users { get; set; } = new List<User>();
 
 
 
