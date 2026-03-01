@@ -8,7 +8,9 @@ namespace JegyMester.DataContext.Entities
         public int Id { get; set; }
         public string Name { get; set; }
         public TicketType Type { get; set; }
-        public bool valid { get; set; }
+        public bool Valid { get; set; }
         public int Price { get; set; }
+        public int SeatNumber { get; set; }
+        public Screening Screening { get; set; }
     }
 }
