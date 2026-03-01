@@ -4,14 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Jegymester.Entities
+namespace JegyMester.DataContext.Entities
 {
     public class Role
     {
         public int Id { get; set; }
-
-        public string Name { get; set; }
-
-        public IEnumerable<User> Users { get; set; } = new List<User>();
+        public string Name { get; set; } = string.Empty;
+        public ICollection<User> Users { get; set; } = new List<User>();
     }
 }

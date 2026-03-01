@@ -1,4 +1,7 @@
-namespace Jegymester
+using JegyMester.DataContext.Context;
+using Microsoft.EntityFrameworkCore;
+
+namespace JegyMester
 {
     public class Program
     {
@@ -8,6 +11,9 @@ namespace Jegymester
 
             // Add services to the container.
             builder.Services.AddRazorPages();
+
+            // Ez majd ha meglesz az adatbázis akkor kell
+            // builder.Services.AddDbContext<JegyMesterDbContext>(options => options.UseSqlServer("Server=(local);Database=JegyMesterDB;Trusted_Connection=True;TrustServerCertificate=True;"));
 
             var app = builder.Build();
 
