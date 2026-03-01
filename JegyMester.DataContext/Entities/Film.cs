@@ -11,5 +11,6 @@ namespace JegyMester.DataContext.Entities
         public int DurationInMinutes { get; set; }
         public string Director { get; set; } = string.Empty;
         public DateTime ReleaseDate { get; set; }
+        public ICollection<Screening> Screenings { get; set; } = new List<Screening>();
     }
 }

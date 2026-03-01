@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace JegyMester.DataContext.Enums
 {
-    internal class TicketType
+    public enum TicketType
     {
+        Adult,
+        Student,
+        Child,
+        Senior,
+        VIP
     }
 }
