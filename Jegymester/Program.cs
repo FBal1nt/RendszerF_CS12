@@ -1,5 +1,7 @@
 using JegyMester.DataContext.Context;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.Metrics;
 
 namespace JegyMester
 {
@@ -12,8 +14,9 @@ namespace JegyMester
             // Add services to the container.
             builder.Services.AddRazorPages();
 
-            // Ez majd ha meglesz az adatbázis akkor kell
-            // builder.Services.AddDbContext<JegyMesterDbContext>(options => options.UseSqlServer("Server=(local);Database=JegyMesterDB;Trusted_Connection=True;TrustServerCertificate=True;"));
+            builder.Services.AddDbContext<JegyMesterDbContext>(
+                options => options.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=JegyMesterDB;Trusted_Connection=True;TrustServerCertificate=True;",
+                b => b.MigrationsAssembly("JegyMester.DataContext")));
 
             var app = builder.Build();
 

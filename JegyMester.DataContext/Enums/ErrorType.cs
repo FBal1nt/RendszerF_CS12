@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace JegyMester.DataContext.Enums
+﻿namespace JegyMester.DataContext.Enums
 {
     public enum ErrorType
     {

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace JegyMester.DataContext.Entities
+﻿namespace JegyMester.DataContext.Entities
 {
     public class User
     {

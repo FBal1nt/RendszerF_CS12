@@ -1,5 +1,4 @@
 ﻿using JegyMester.DataContext.Enums;
-using System;
 
 namespace JegyMester.DataContext.Entities
 {

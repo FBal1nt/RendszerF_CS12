@@ -1,8 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using JegyMester.DataContext.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace JegyMester.DataContext.Context
 {
@@ -15,5 +12,21 @@ namespace JegyMester.DataContext.Context
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<TicketPurchase> TicketPurchases { get; set; }
         public DbSet<User> Users { get; set; }
+
+        public JegyMesterDbContext(DbContextOptions<JegyMesterDbContext> options)
+            : base(options)
+        {
+        }
+
+        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+        {
+            configurationBuilder
+                .Properties<Enum>()
+                .HaveConversion<string>();
+
+            configurationBuilder
+                .Properties<decimal>()
+                .HavePrecision(18, 2);
+        }
     }
 }
