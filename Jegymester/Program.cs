@@ -13,7 +13,7 @@ namespace JegyMester
             builder.Services.AddRazorPages();
 
             // Ez majd ha meglesz az adatbázis akkor kell
-            // builder.Services.AddDbContext<JegyMesterDbContext>(options => options.UseSqlServer("Server=(local);Database=JegyMesterDB;Trusted_Connection=True;TrustServerCertificate=True;"));
+            builder.Services.AddDbContext<JegyMesterDbContext>(options => options.UseSqlServer("Server=(local);Database=JegyMesterDB;Trusted_Connection=True;TrustServerCertificate=True;"));
 
             var app = builder.Build();
 
