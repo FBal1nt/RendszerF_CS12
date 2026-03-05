@@ -7,7 +7,21 @@ namespace JegyMester.DataContext.Entities
     public class Ticket
     {
         public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
+        public string Name
+        {
+            get
+            {
+                return Type switch
+                {
+                    TicketType.Adult => "Felnőtt jegy",
+                    TicketType.Student => "Diákjegy",
+                    TicketType.Child => "Gyerekjegy",
+                    TicketType.Senior => "Nyugdíjas jegy",
+                    TicketType.VIP => "VIP jegy",
+                    _ => "Ismeretlen jegy"
+                };
+            }
+        }
         public TicketType Type { get; set; }
         public bool Valid { get; set; }
         public decimal Price { get; set; }

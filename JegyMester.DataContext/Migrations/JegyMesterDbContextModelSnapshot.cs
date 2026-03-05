@@ -39,30 +39,6 @@ namespace JegyMester.DataContext.Migrations
                     b.ToTable("Cinemas");
                 });
 
-            modelBuilder.Entity("JegyMester.DataContext.Entities.Error", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("ErrorDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ErrorMessage")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ErrorType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Errors");
-                });
-
             modelBuilder.Entity("JegyMester.DataContext.Entities.Film", b =>
                 {
                     b.Property<int>("Id")
@@ -168,10 +144,6 @@ namespace JegyMester.DataContext.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)

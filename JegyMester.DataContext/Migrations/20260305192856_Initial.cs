@@ -25,21 +25,6 @@ namespace JegyMester.DataContext.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Errors",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ErrorType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ErrorMessage = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ErrorDateTime = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Errors", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Films",
                 columns: table => new
                 {
@@ -182,7 +167,6 @@ namespace JegyMester.DataContext.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Valid = table.Column<bool>(type: "bit", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
@@ -248,9 +232,6 @@ namespace JegyMester.DataContext.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Errors");
-
             migrationBuilder.DropTable(
                 name: "RoleUser");
 
