@@ -12,6 +12,19 @@ namespace JegyMester.DataContext.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Cinemas",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Cinemas", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Errors",
                 columns: table => new
                 {
@@ -72,25 +85,21 @@ namespace JegyMester.DataContext.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Screenings",
+                name: "Rooms",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Location = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Room = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    MaxCapacity = table.Column<int>(type: "int", nullable: false),
-                    FilmId = table.Column<int>(type: "int", nullable: false)
+                    CinemaId = table.Column<int>(type: "int", nullable: false),
+                    Capacity = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Screenings", x => x.Id);
+                    table.PrimaryKey("PK_Rooms", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Screenings_Films_FilmId",
-                        column: x => x.FilmId,
-                        principalTable: "Films",
+                        name: "FK_Rooms_Cinemas_CinemaId",
+                        column: x => x.CinemaId,
+                        principalTable: "Cinemas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -140,6 +149,34 @@ namespace JegyMester.DataContext.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Screenings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    RoomId = table.Column<int>(type: "int", nullable: false),
+                    FilmId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Screenings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Screenings_Films_FilmId",
+                        column: x => x.FilmId,
+                        principalTable: "Films",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Screenings_Rooms_RoomId",
+                        column: x => x.RoomId,
+                        principalTable: "Rooms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Tickets",
                 columns: table => new
                 {
@@ -177,9 +214,19 @@ namespace JegyMester.DataContext.Migrations
                 column: "UsersId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Rooms_CinemaId",
+                table: "Rooms",
+                column: "CinemaId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Screenings_FilmId",
                 table: "Screenings",
                 column: "FilmId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Screenings_RoomId",
+                table: "Screenings",
+                column: "RoomId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TicketPurchases_UserId",
@@ -223,7 +270,13 @@ namespace JegyMester.DataContext.Migrations
                 name: "Films");
 
             migrationBuilder.DropTable(
+                name: "Rooms");
+
+            migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Cinemas");
         }
     }
 }

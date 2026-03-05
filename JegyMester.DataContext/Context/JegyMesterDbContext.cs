@@ -12,6 +12,8 @@ namespace JegyMester.DataContext.Context
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<TicketPurchase> TicketPurchases { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Room> Rooms { get; set; }
+        public DbSet<Cinema> Cinemas { get; set; }
 
         public JegyMesterDbContext(DbContextOptions<JegyMesterDbContext> options)
             : base(options)
