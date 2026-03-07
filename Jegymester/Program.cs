@@ -1,5 +1,6 @@
 using JegyMester.DataContext.Context;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 using NLog;
 using NLog.Web;
 
@@ -22,9 +23,23 @@ namespace JegyMester
                 options => options.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=JegyMesterDB;Trusted_Connection=True;TrustServerCertificate=True;",
                 b => b.MigrationsAssembly("JegyMester.DataContext")));
 
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "JegyMester API",
+                    Version = "v1",
+                    Description = "JegyMester API"
+                });
+            });
+
             logger.Info("Building JegyMester");
             var app = builder.Build();
-            
+
+            app.UseSwagger();
+            app.UseSwaggerUI();
+
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
