@@ -1,9 +1,9 @@
 ﻿namespace JegyMester.DataContext.Entities
 {
-    public class Role
+    public class Cinema
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
-        public ICollection<User> Users { get; set; } = new List<User>();
+        public ICollection<Room> Rooms { get; set; } = new List<Room>();
     }
 }
