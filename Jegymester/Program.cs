@@ -20,7 +20,7 @@ namespace JegyMester
             builder.Services.AddRazorPages();
 
             builder.Services.AddDbContext<JegyMesterDbContext>(
-                options => options.UseSqlServer("Server=localhost\\SQLEXPRESS;Database=JegyMesterDB;Trusted_Connection=True;TrustServerCertificate=True;",
+                options => options.UseSqlServer("Server=localhost;Database=JegyMesterDB;Trusted_Connection=True;TrustServerCertificate=True;",
                 b => b.MigrationsAssembly("JegyMester.DataContext")));
 
             builder.Services.AddEndpointsApiExplorer();
