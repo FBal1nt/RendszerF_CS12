@@ -11,11 +11,15 @@ namespace JegyMester
 
             // Add services to the container.
             builder.Services.AddRazorPages();
+            builder.Services.AddControllers();
 
-            // Ez majd ha meglesz az adatb·zis akkor kell
+            // Ez majd ha meglesz az adatb√°zis akkor kell
             builder.Services.AddDbContext<JegyMesterDbContext>(options => options.UseSqlServer("Server=(local);Database=JegyMesterDB;Trusted_Connection=True;TrustServerCertificate=True;"));
 
             var app = builder.Build();
+
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
