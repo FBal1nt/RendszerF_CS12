@@ -1,0 +1,28 @@
+﻿@page
+@model RegisterModel
+
+<h2>Regisztráció</h2>
+
+<form method="post">
+    <div>
+        <label>Email</label>
+        <input asp-for="Email" />
+    </div>
+
+    <div>
+        <label>Jelszó</label>
+        <input asp-for="Password" type="password" />
+    </div>
+
+    <div>
+        <label>Jelszó mégegyszer</label>
+        <input asp-for="ConfirmPassword" type="password" />
+    </div>
+
+    <button type="submit">Regisztráció</button>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <p style="color:red">@Model.ErrorMessage</p>
+    }
+</form>

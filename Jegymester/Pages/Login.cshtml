@@ -1,0 +1,16 @@
+﻿@page
+@model LoginModel
+
+<h3>Bejelentkezés</h3>
+
+<form method="post">
+    <input asp-for="Email" placeholder="Email" />
+    <input asp-for="Password" type="password" placeholder="Jelszó" />
+
+    <button type="submit">Bejelentkezés</button>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <p>@Model.ErrorMessage</p>
+    }
+</form>
