@@ -70,7 +70,7 @@ a {
         text-decoration: underline; /* Aláhúzás megjelenítése */
     }
 
-h1, p {
+h1, h2, h3, p {
     /* Paraméterek: vízszintes, függõleges, elmosódás mértéke, szín */
     text-shadow: 2px 2px 4px #04fff7;
 }
@@ -98,7 +98,7 @@ h1, p {
     transition: all 0.4s ease; /* Finom animáció mindenre */
     box-shadow: 0 4px 15px rgba(255, 204, 0, 0.2); /* Enyhe arany ragyogás */
     cursor: pointer;
-    margin-right: 10px; /* Távolság az ikon és a szöveg között */
+    margin: 10px;
     font-size: 1.1em; /* Kicsit nagyobb ikon az extra hatásért */
 }
 
@@ -108,6 +108,73 @@ h1, p {
         color: #1a1a1a;
         box-shadow: 0 0 25px rgba(255, 204, 0, 0.7); /* Erõsebb neon ragyogás */
         transform: scale(1.05); /* Kicsit "kiugrik" a gomb */
-        margin-right: 10px; /* Távolság az ikon és a szöveg között */
+        margin: 10px; 
+        font-size: 1.3em; /* Kicsit nagyobb ikon az extra hatásért */
+    }
+
+.cinema-table {
+    width: 100%;
+    border-collapse: collapse; /* A szegélyek egybeolvadnak */
+    background-color: #1a1a1a; /* Sötétszürke háttér */
+    color: white;
+    font-family: 'Segoe UI', sans-serif;
+    border: 2px solid #ffcc00; /* Arany keret az egész táblázatnak */
+    box-shadow: 0 0 20px rgba(255, 204, 0, 0.1); /* Enyhe külsõ ragyogás */
+    margin: 20px 0;
+}
+
+    /* Fejléc stílusa */
+    .cinema-table th {
+        background-color: #333;
+        color: #ffcc00; /* Arany szöveg a fejlécben */
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 15px;
+        border-bottom: 2px solid #ffcc00;
+        text-align: left;
+    }
+
+    /* Cellák stílusa */
+    .cinema-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #333;
+    }
+
+    /* Zebra csíkozás (opcionális, de segíti az olvasást) */
+    .cinema-table tr:nth-child(even) {
+        background-color: #222;
+    }
+
+    /* Sor kiemelése, ha az egér felette van */
+    .cinema-table tr:hover {
+        background-color: rgba(255, 204, 0, 0.1); /* Halvány arany háttér */
+        transition: background-color 0.3s ease;
+    }
+
+.cinema-btn-danger {
+    display: inline-block;
+    padding: 12px 30px;
+    background-color: crimson;
+    color: #ffcc00; /* "Mozi-arany" szöveg */
+    border: 2px solid #ffcc00; /* Arany szegély */
+    border-radius: 50px; /* Lekerekített szélek */
+    text-transform: uppercase; /* Csupa nagybetû */
+    font-weight: bold;
+    letter-spacing: 2px; /* Szellõsebb betûk */
+    text-decoration: none;
+    transition: all 0.4s ease; /* Finom animáció mindenre */
+    box-shadow: 0 4px 15px rgba(255, 204, 0, 0.2); /* Enyhe arany ragyogás */
+    cursor: pointer;
+    margin: 10px;
+    font-size: 1.1em; /* Kicsit nagyobb ikon az extra hatásért */
+}
+
+    /* Effekt, amikor az egér fölé ér */
+    .cinema-btn-danger:hover {
+        background-color: #ffcc00; /* Megcseréljük a színeket */
+        color: crimson;
+        box-shadow: 0 0 25px rgba(255, 204, 0, 0.7); /* Erõsebb neon ragyogás */
+        transform: scale(1.05); /* Kicsit "kiugrik" a gomb */
+        margin: 10px;
         font-size: 1.3em; /* Kicsit nagyobb ikon az extra hatásért */
     }

@@ -21,3 +21,5 @@ obj/
 ## OS files
 Thumbs.db
 .DS_Store
+/Jegymester/appsettings.json
+/Jegymester/Program.cs
