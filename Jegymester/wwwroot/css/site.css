@@ -12,14 +12,41 @@ html {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
+.link_footer {
+    color: blue;
+}
+
+.link_footer:hover {
+    color: blueviolet;
+    text-decoration: underline;
+}
+
 html {
   position: relative;
   min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
+    color: white;
 }
+
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: calc(100% - 60px);
+        z-index: -1; /* Hogy a tartalom mögött maradjon */
+
+        background-image: url('/images/view-3d-cinema-theatre-room.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        /* HALVÁNYÍTÁS: 0.0 (teljesen átlátszó) és 1.0 (eredeti) között */
+        opacity: 0.8;
+    }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
@@ -29,3 +56,58 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* Alapértelmezett link szín */
+a {
+    color: yellow; /* Kék szín */
+    text-decoration: none; /* Aláhúzás eltávolítása (opcionális) */
+    transition: 0.3s; /* Finom átmenet a színváltáskor */
+}
+
+    /* Szín, amikor az egér felette van */
+    a:hover {
+        color: aqua; /* Sötétebb kék */
+        text-decoration: underline; /* Aláhúzás megjelenítése */
+    }
+
+h1, p {
+    /* Paraméterek: vízszintes, függõleges, elmosódás mértéke, szín */
+    text-shadow: 2px 2px 4px #04fff7;
+}
+
+.main-menu {
+    display: flex; /* Bekapcsoljuk a Flexbox-ot */
+    justify-content: center; /* Vízszintes középre igazítás */
+    align-items: center; /* Függõleges középre igazítás */
+
+    min-height: 80vh;
+    width: 100%;
+}
+
+.cinema-btn {
+    display: inline-block;
+    padding: 12px 30px;
+    background-color: #1a1a1a; /* Mélysötét szürke/fekete */
+    color: #ffcc00; /* "Mozi-arany" szöveg */
+    border: 2px solid #ffcc00; /* Arany szegély */
+    border-radius: 50px; /* Lekerekített szélek */
+    text-transform: uppercase; /* Csupa nagybetû */
+    font-weight: bold;
+    letter-spacing: 2px; /* Szellõsebb betûk */
+    text-decoration: none;
+    transition: all 0.4s ease; /* Finom animáció mindenre */
+    box-shadow: 0 4px 15px rgba(255, 204, 0, 0.2); /* Enyhe arany ragyogás */
+    cursor: pointer;
+    margin-right: 10px; /* Távolság az ikon és a szöveg között */
+    font-size: 1.1em; /* Kicsit nagyobb ikon az extra hatásért */
+}
+
+    /* Effekt, amikor az egér fölé ér */
+    .cinema-btn:hover {
+        background-color: #ffcc00; /* Megcseréljük a színeket */
+        color: #1a1a1a;
+        box-shadow: 0 0 25px rgba(255, 204, 0, 0.7); /* Erõsebb neon ragyogás */
+        transform: scale(1.05); /* Kicsit "kiugrik" a gomb */
+        margin-right: 10px; /* Távolság az ikon és a szöveg között */
+        font-size: 1.3em; /* Kicsit nagyobb ikon az extra hatásért */
+    }
