@@ -1,0 +1,55 @@
+﻿@page
+@model JegyMester.Pages.Film.IndexModel
+
+<p>
+    <a asp-page="Create" class="btn btn-success">Create New</a>
+    <a asp-page="/Index" class="btn btn-secondary">Vissza a főoldalra</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Film[0].Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Film[0].Genre)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Film[0].DurationInMinutes)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Film[0].Director)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Film[0].ReleaseDate)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Film) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Genre)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DurationInMinutes)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Director)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ReleaseDate)
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
