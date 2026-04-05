@@ -12,6 +12,8 @@ namespace JegyMester
 
             // Add services to the container.
             builder.Services.AddRazorPages();
+            builder.Services.AddSession();
+            builder.Services.AddHttpContextAccessor();
 
             // Ez majd ha meglesz az adatbázis akkor kell
             builder.Services.AddDbContext<JegyMesterDbContext>(options => options.UseSqlServer("Server=(local)\\SQLEXPRESS;Database=JegyMesterDB;Trusted_Connection=True;TrustServerCertificate=True;"));
@@ -36,6 +38,7 @@ namespace JegyMester
             app.MapStaticAssets();
             app.MapRazorPages()
                .WithStaticAssets();
+            app.UseSession();
 
             app.Run();
         }

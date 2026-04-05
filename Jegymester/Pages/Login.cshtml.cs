@@ -32,6 +32,7 @@ public class LoginModel : PageModel
         }
 
         // Sikeres login → átirányítás
+        HttpContext.Session.SetString("UserEmail", Email);
         return RedirectToPage("/Index");
     }
 }
