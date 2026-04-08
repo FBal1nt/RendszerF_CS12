@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using JegyMester.DataContext.Context;
-using UserEntity = JegyMester.DataContext.Entities.User;
+using RoomEntity = JegyMester.DataContext.Entities.Room;
 
-namespace JegyMester.Pages.User
+namespace JegyMester.Pages.Room
 {
     public class DeleteModel : PageModel
     {
@@ -20,7 +20,7 @@ namespace JegyMester.Pages.User
         }
 
         [BindProperty]
-        public UserEntity User { get; set; } = default!;
+        public RoomEntity Room { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -29,11 +29,11 @@ namespace JegyMester.Pages.User
                 return NotFound();
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(m => m.Id.Equals(id));
+            var room = await _context.Rooms.FirstOrDefaultAsync(m => m.Id == id);
 
-            if (user is not null)
+            if (room is not null)
             {
-                User = user;
+                Room = room;
 
                 return Page();
             }
@@ -48,11 +48,11 @@ namespace JegyMester.Pages.User
                 return NotFound();
             }
 
-            var user = await _context.Users.FindAsync(id);
-            if (user != null)
+            var room = await _context.Rooms.FindAsync(id);
+            if (room != null)
             {
-                User = user;
-                _context.Users.Remove(User);
+                Room = room;
+                _context.Rooms.Remove(Room);
                 await _context.SaveChangesAsync();
             }
 

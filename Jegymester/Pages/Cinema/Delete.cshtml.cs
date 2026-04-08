@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using JegyMester.DataContext.Context;
-using UserEntity = JegyMester.DataContext.Entities.User;
+using CinemaEntity = JegyMester.DataContext.Entities.Cinema;
 
-namespace JegyMester.Pages.User
+namespace JegyMester.Pages.Cinema
 {
     public class DeleteModel : PageModel
     {
@@ -20,7 +20,7 @@ namespace JegyMester.Pages.User
         }
 
         [BindProperty]
-        public UserEntity User { get; set; } = default!;
+        public CinemaEntity Cinema { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -29,11 +29,11 @@ namespace JegyMester.Pages.User
                 return NotFound();
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(m => m.Id.Equals(id));
+            var cinema = await _context.Cinemas.FirstOrDefaultAsync(m => m.Id == id);
 
-            if (user is not null)
+            if (cinema is not null)
             {
-                User = user;
+                Cinema = cinema;
 
                 return Page();
             }
@@ -48,11 +48,11 @@ namespace JegyMester.Pages.User
                 return NotFound();
             }
 
-            var user = await _context.Users.FindAsync(id);
-            if (user != null)
+            var cinema = await _context.Cinemas.FindAsync(id);
+            if (cinema != null)
             {
-                User = user;
-                _context.Users.Remove(User);
+                Cinema = cinema;
+                _context.Cinemas.Remove(Cinema);
                 await _context.SaveChangesAsync();
             }
 

@@ -3,15 +3,16 @@
 @{
     ViewData["Title"] = "Home page";
 }
-<div class="main-menu">
-    <div class="text-center">
-        <h1 class="display-4">Üdvözlünk!</h1>
-        <p>Ez a Jegymester weboldal, ahol jegyeket lehet vásárolni mozis filmnézéshez.</p>
-        <p>
-            <a asp-page="/Role/Index" class="cinema-btn">Role-ok megtekintése</a>
-        </p>
-        <p>
-            <a asp-page="/User/Index" class="cinema-btn">User-ek megtekintése</a>
-        </p>
-    </div>
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <p>
+        <a asp-page="/Role/Index" class="btn btn-primary">Role-ok megtekintése</a>
+        <a asp-page="/Film/Index" class="btn btn-secondary">Filmek listája</a>
+        <a asp-page="/User/Index" class="btn btn-secondary">Felhasználók listája</a>
+        <a asp-page="/Room/Index" class="btn btn-secondary">Termek listája</a>
+        <a asp-page="/Cinema/Index" class="btn btn-secondary">Cinema-k listája</a>
+        <a asp-page="/Screening/Index" class="btn btn-secondary">Előadások listája</a>
+    </p>
 </div>

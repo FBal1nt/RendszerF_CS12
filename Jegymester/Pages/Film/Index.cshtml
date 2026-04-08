@@ -1,5 +1,5 @@
 ﻿@page
-@model JegyMester.Pages.User.IndexModel
+@model JegyMester.Pages.Film.IndexModel
 
 <p>
     <a asp-page="Create" class="btn btn-success">Create New</a>
@@ -9,34 +9,40 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.User[0].Name)
+                @Html.DisplayNameFor(model => model.Film[0].Title)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.User[0].Email)
+                @Html.DisplayNameFor(model => model.Film[0].Genre)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.User[0].PhoneNumber)
+                @Html.DisplayNameFor(model => model.Film[0].DurationInMinutes)
             </th>
             <th>
-                Szerepek
+                @Html.DisplayNameFor(model => model.Film[0].Director)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Film[0].ReleaseDate)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.User) {
+@foreach (var item in Model.Film) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Name)
+                @Html.DisplayFor(modelItem => item.Title)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Email)
+                @Html.DisplayFor(modelItem => item.Genre)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.PhoneNumber)
+                @Html.DisplayFor(modelItem => item.DurationInMinutes)
             </td>
             <td>
-                @string.Join(", ", item.Roles.Select(r => r.Name))
+                @Html.DisplayFor(modelItem => item.Director)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ReleaseDate)
             </td>
             <td>
                 <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |

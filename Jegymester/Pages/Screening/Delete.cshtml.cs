@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using JegyMester.DataContext.Context;
-using UserEntity = JegyMester.DataContext.Entities.User;
+using ScreeningEntity = JegyMester.DataContext.Entities.Screening;
 
-namespace JegyMester.Pages.User
+namespace JegyMester.Pages.Screening
 {
     public class DeleteModel : PageModel
     {
@@ -20,7 +20,7 @@ namespace JegyMester.Pages.User
         }
 
         [BindProperty]
-        public UserEntity User { get; set; } = default!;
+        public ScreeningEntity Screening { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -29,11 +29,11 @@ namespace JegyMester.Pages.User
                 return NotFound();
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(m => m.Id.Equals(id));
+            var screening = await _context.Screenings.FirstOrDefaultAsync(m => m.Id == id);
 
-            if (user is not null)
+            if (screening is not null)
             {
-                User = user;
+                Screening = screening;
 
                 return Page();
             }
@@ -48,11 +48,11 @@ namespace JegyMester.Pages.User
                 return NotFound();
             }
 
-            var user = await _context.Users.FindAsync(id);
-            if (user != null)
+            var screening = await _context.Screenings.FindAsync(id);
+            if (screening != null)
             {
-                User = user;
-                _context.Users.Remove(User);
+                Screening = screening;
+                _context.Screenings.Remove(Screening);
                 await _context.SaveChangesAsync();
             }
 

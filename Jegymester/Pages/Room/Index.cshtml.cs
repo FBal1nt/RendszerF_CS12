@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using JegyMester.DataContext.Context;
-using UserEntity = JegyMester.DataContext.Entities.User;
+using RoomEntity = JegyMester.DataContext.Entities.Room;
 
-namespace JegyMester.Pages.User
+namespace JegyMester.Pages.Room
 {
     public class IndexModel : PageModel
     {
@@ -19,13 +19,12 @@ namespace JegyMester.Pages.User
             _context = context;
         }
 
-        public IList<UserEntity> User { get;set; } = default!;
+        public IList<RoomEntity> Room { get;set; } = default!;
 
         public async Task OnGetAsync()
         {
-            User = await _context.Users
-                .Include(u => u.Roles)
-                .ToListAsync();
+            Room = await _context.Rooms
+                .Include(r => r.Cinema).ToListAsync();
         }
     }
 }
