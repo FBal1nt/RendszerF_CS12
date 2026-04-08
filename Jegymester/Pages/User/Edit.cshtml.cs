@@ -7,7 +7,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using JegyMester.DataContext.Context;
-using JegyMester.DataContext.Entities;
+using UserEntity = JegyMester.DataContext.Entities.User;
+using RoleEntity = JegyMester.DataContext.Entities.Role;
 
 namespace JegyMester.Pages.User
 {
@@ -21,7 +22,12 @@ namespace JegyMester.Pages.User
         }
 
         [BindProperty]
-        public DataContext.Entities.User User { get; set; } = default!;
+        public UserEntity User { get; set; } = default!;
+
+        [BindProperty]
+        public List<int> SelectedRoleIds { get; set; } = new();
+
+        public List<RoleEntity> AllRoles { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -30,12 +36,14 @@ namespace JegyMester.Pages.User
                 return NotFound();
             }
 
-            var user =  await _context.Users.FirstOrDefaultAsync(m => m.Id == id);
+            var user =  await _context.Users.Include(u => u.Roles).FirstOrDefaultAsync(m => m.Id == id);
             if (user == null)
             {
                 return NotFound();
             }
             User = user;
+            AllRoles = await _context.Roles.ToListAsync();
+            SelectedRoleIds = user.Roles.Select(r => r.Id).ToList();
             return Page();
         }
 
@@ -48,10 +56,30 @@ namespace JegyMester.Pages.User
                 return Page();
             }
 
-            _context.Attach(User).State = EntityState.Modified;
-
             try
             {
+                var userFromDb = await _context.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Id == User.Id);
+                if (userFromDb == null)
+                {
+                    return NotFound();
+                }
+
+                // update scalar properties
+                userFromDb.Name = User.Name;
+                userFromDb.Email = User.Email;
+                userFromDb.PhoneNumber = User.PhoneNumber;
+
+                // update roles
+                var roles = SelectedRoleIds?.Any() == true
+                    ? _context.Roles.Where(r => SelectedRoleIds.Contains(r.Id)).ToList()
+                    : new List<RoleEntity>();
+
+                userFromDb.Roles.Clear();
+                foreach (var r in roles)
+                {
+                    userFromDb.Roles.Add(r);
+                }
+
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)

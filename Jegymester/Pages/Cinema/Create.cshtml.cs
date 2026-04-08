@@ -6,10 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using JegyMester.DataContext.Context;
-using UserEntity = JegyMester.DataContext.Entities.User;
-using RoleEntity = JegyMester.DataContext.Entities.Role;
+using CinemaEntity = JegyMester.DataContext.Entities.Cinema;
 
-namespace JegyMester.Pages.User
+namespace JegyMester.Pages.Cinema
 {
     public class CreateModel : PageModel
     {
@@ -22,33 +21,21 @@ namespace JegyMester.Pages.User
 
         public IActionResult OnGet()
         {
-            AllRoles = _context.Roles.ToList();
             return Page();
         }
 
         [BindProperty]
-        public UserEntity User { get; set; } = default!;
-        [BindProperty]
-        public List<int> SelectedRoleIds { get; set; } = new();
-
-        public List<RoleEntity> AllRoles { get; set; } = new();
+        public CinemaEntity Cinema { get; set; } = default!;
 
         // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
             {
-                AllRoles = _context.Roles.ToList();
                 return Page();
             }
 
-            if (SelectedRoleIds?.Any() ?? false)
-            {
-                var roles = _context.Roles.Where(r => SelectedRoleIds.Contains(r.Id)).ToList();
-                User.Roles = roles;
-            }
-
-            _context.Users.Add(User);
+            _context.Cinemas.Add(Cinema);
             await _context.SaveChangesAsync();
 
             return RedirectToPage("./Index");

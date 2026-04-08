@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using JegyMester.DataContext.Context;
-using UserEntity = JegyMester.DataContext.Entities.User;
+using FilmEntity = JegyMester.DataContext.Entities.Film;
 
-namespace JegyMester.Pages.User
+namespace JegyMester.Pages.Film
 {
     public class DetailsModel : PageModel
     {
@@ -19,7 +19,7 @@ namespace JegyMester.Pages.User
             _context = context;
         }
 
-        public UserEntity User { get; set; } = default!;
+        public FilmEntity Film { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -28,13 +28,11 @@ namespace JegyMester.Pages.User
                 return NotFound();
             }
 
-            var user = await _context.Users
-                .Include(u => u.Roles)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var film = await _context.Films.FirstOrDefaultAsync(m => m.Id == id);
 
-            if (user is not null)
+            if (film is not null)
             {
-                User = user;
+                Film = film;
 
                 return Page();
             }

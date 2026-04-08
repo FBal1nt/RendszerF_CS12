@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using JegyMester.DataContext.Context;
-using UserEntity = JegyMester.DataContext.Entities.User;
+using ScreeningEntity = JegyMester.DataContext.Entities.Screening;
 
-namespace JegyMester.Pages.User
+namespace JegyMester.Pages.Screening
 {
     public class DetailsModel : PageModel
     {
@@ -19,7 +19,7 @@ namespace JegyMester.Pages.User
             _context = context;
         }
 
-        public UserEntity User { get; set; } = default!;
+        public ScreeningEntity Screening { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -28,13 +28,11 @@ namespace JegyMester.Pages.User
                 return NotFound();
             }
 
-            var user = await _context.Users
-                .Include(u => u.Roles)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var screening = await _context.Screenings.FirstOrDefaultAsync(m => m.Id == id);
 
-            if (user is not null)
+            if (screening is not null)
             {
-                User = user;
+                Screening = screening;
 
                 return Page();
             }
