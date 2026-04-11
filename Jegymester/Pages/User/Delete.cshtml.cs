@@ -28,7 +28,7 @@ namespace JegyMester.Pages.User
                 return NotFound();
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(m => m.Id == id);
+            var user = await _context.Users.FirstOrDefaultAsync(m => m.Id.Equals(id));
 
             if (user is not null)
             {

@@ -23,3 +23,4 @@ Thumbs.db
 .DS_Store
 /Jegymester/appsettings.json
 /Jegymester/Program.cs
+/Jegymester/JegyMester.csproj
