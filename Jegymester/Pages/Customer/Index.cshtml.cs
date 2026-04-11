@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace JegyMester.Pages.Admin
+namespace JegyMester.Pages.Customer
 {
-    public class IndexModelAdmin : PageModel
+    [Authorize(Roles = "Customer")]
+    public class IndexModelCustomer : PageModel
     {
         public void OnGet()
         {
