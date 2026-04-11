@@ -30,7 +30,7 @@ namespace JegyMester.Pages.User
                 return NotFound();
             }
 
-            var user =  await _context.Users.FirstOrDefaultAsync(m => m.Id == id);
+            var user =  await _context.Users.FirstOrDefaultAsync(m => m.Id.Equals(id));
             if (user == null)
             {
                 return NotFound();
@@ -69,9 +69,9 @@ namespace JegyMester.Pages.User
             return RedirectToPage("./Index");
         }
 
-        private bool UserExists(int id)
+        private bool UserExists(string id)
         {
-            return _context.Users.Any(e => e.Id == id);
+            return _context.Users.Any(e => e.Id.Equals(id));
         }
     }
 }
