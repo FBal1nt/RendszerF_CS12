@@ -1,24 +1,30 @@
 ﻿@page
-@model JegyMester.Pages.Cinema.IndexModel
+@model JegyMester.Pages.Room.IndexModel
 
 <p>
     <a asp-page="Create" class="btn btn-success">Create New</a>
-    <a asp-page="/Index" class="btn btn-secondary">Vissza a főoldalra</a>
+    <a asp-page="/Admin/Index" class="btn btn-secondary">Vissza a főoldalra</a>
 </p>
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Cinema[0].Name)
+                @Html.DisplayNameFor(model => model.Room[0].Cinema)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Room[0].Capacity)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.Cinema) {
+@foreach (var item in Model.Room) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Name)
+                @Html.DisplayFor(modelItem => item.Cinema.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Capacity)
             </td>
             <td>
                 <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |

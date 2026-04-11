@@ -44,7 +44,7 @@ namespace JegyMester.Pages.User
 
             if (SelectedRoleIds?.Any() ?? false)
             {
-                var roles = _context.Roles.Where(r => SelectedRoleIds.Contains(r.Id)).ToList();
+                var roles = _context.Roles.Where(r => SelectedRoleIds.Any(e => e.Equals(r.Id))).ToList();
                 User.Roles = roles;
             }
 

@@ -18,10 +18,12 @@ namespace JegyMester.Pages.User
         public EditModel(JegyMester.DataContext.Context.JegyMesterDbContext context)
         {
             _context = context;
+            AllRoles = _context.Roles.ToList();
         }
 
         [BindProperty]
         public DataContext.Entities.User User { get; set; } = default!;
+        public List<DataContext.Entities.Role> AllRoles { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -72,6 +74,11 @@ namespace JegyMester.Pages.User
         private bool UserExists(string id)
         {
             return _context.Users.Any(e => e.Id.Equals(id));
+        }
+
+        public List<string> SelectedRoleIds
+        {
+            get => AllRoles.Select(r => r.Id).ToList();
         }
     }
 }

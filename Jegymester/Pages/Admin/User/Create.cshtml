@@ -28,7 +28,7 @@
                     @foreach (var role in Model.AllRoles)
                     {
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="SelectedRoleIds" value="@role.Id" @(Model.SelectedRoleIds.Contains(role.Id) ? "checked" : "") />
+                            <input class="form-check-input" type="checkbox" name="SelectedRoleIds" value="@role.Id" @(Model.SelectedRoleIds.Any(r => r.Equals(role.Id)) ? "checked" : "") />
                             <label class="form-check-label">@role.Name</label>
                         </div>
                     }
