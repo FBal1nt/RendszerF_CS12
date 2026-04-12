@@ -1,0 +1,37 @@
+﻿@page
+@model JegyMester.Pages.Room.IndexModelRoom
+
+<p>
+    <a asp-page="Create" class="btn btn-success">Create New</a>
+    <a asp-page="/Index" class="btn btn-secondary">Vissza a főoldalra</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Room[0].Cinema)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Room[0].Capacity)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Room) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Cinema.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Capacity)
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

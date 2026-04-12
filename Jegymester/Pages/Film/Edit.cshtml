@@ -1,0 +1,46 @@
+﻿@page
+@model JegyMester.Pages.Film.EditModelFilm
+
+<h4>Film</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Film.Id" />
+            <div class="form-group">
+                <label asp-for="Film.Title" class="control-label"></label>
+                <input asp-for="Film.Title" class="form-control" />
+                <span asp-validation-for="Film.Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Film.Genre" class="control-label"></label>
+                <select asp-for="Film.Genre" asp-items="Model.GenreSelectList" class="form-control"></select>
+                <span asp-validation-for="Film.Genre" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Film.DurationInMinutes" class="control-label"></label>
+                <input asp-for="Film.DurationInMinutes" class="form-control" />
+                <span asp-validation-for="Film.DurationInMinutes" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Film.Director" class="control-label"></label>
+                <input asp-for="Film.Director" class="form-control" />
+                <span asp-validation-for="Film.Director" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Film.ReleaseDate" class="control-label"></label>
+                <input asp-for="Film.ReleaseDate" class="form-control" />
+                <span asp-validation-for="Film.ReleaseDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+

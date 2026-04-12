@@ -1,0 +1,41 @@
+﻿@page
+@model JegyMester.Pages.Screening.EditModelScreening
+
+<h4>Screening</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Screening.Id" />
+            <div class="form-group">
+                <label asp-for="Screening.StartTime" class="control-label"></label>
+                <input asp-for="Screening.StartTime" class="form-control" />
+                <span asp-validation-for="Screening.StartTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Screening.EndTime" class="control-label"></label>
+                <input asp-for="Screening.EndTime" class="form-control" />
+                <span asp-validation-for="Screening.EndTime" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Screening.RoomId" class="control-label"></label>
+                <select asp-for="Screening.RoomId" class="form-control" asp-items="ViewBag.RoomId" ></select>
+                <span asp-validation-for="Screening.RoomId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Screening.FilmId" class="control-label"></label>
+                <select asp-for="Screening.FilmId" class="form-control" asp-items="ViewBag.FilmId" ></select>
+                <span asp-validation-for="Screening.FilmId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+

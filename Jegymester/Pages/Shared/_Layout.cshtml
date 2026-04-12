@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -26,9 +28,34 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
                         </li>
+                        @if (HttpContextAccessor.HttpContext.Session.GetString("UserEmail") == null)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Login">Bejelentkezés</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Register">Regisztrálás</a>
+                            </li>
+                        }
+
+
                     </ul>
+
                 </div>
+                @if (HttpContextAccessor.HttpContext.Session.GetString("UserEmail") != null)
+                {
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            @HttpContextAccessor.HttpContext.Session.GetString("UserEmail")
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" asp-page="/Profile">Profil</a></li>
+                            <li><a class="dropdown-item" asp-page="/Logout">Kijelentkezés</a></li>
+                        </ul>
+                    </div>
+                }
             </div>
+
         </nav>
     </header>
     <div class="container">

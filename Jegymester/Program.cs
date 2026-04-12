@@ -50,7 +50,14 @@ namespace JegyMester
                 });
             });
 
-            
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(20);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+            builder.Services.AddHttpContextAccessor(); // optional but explicit
 
             logger.Info("Building JegyMester");
             var app = builder.Build();
@@ -70,8 +77,11 @@ namespace JegyMester
 
             app.UseRouting();
 
+            app.UseSession();              // <- add this
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.MapRazorPages();
 
             app.MapStaticAssets();
             app.MapRazorPages()
