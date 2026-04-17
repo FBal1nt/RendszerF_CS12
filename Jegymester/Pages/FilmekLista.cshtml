@@ -1,0 +1,24 @@
+@page
+@model JegyMester.Pages.FilmekListaModel
+
+<h3>FILMEK</h3>
+<hr />
+
+@if (Model.Filmek?.Any() != true)
+{
+    <p>Nincsenek filmek a listában.</p>
+}
+else
+{
+    <ul class="list-group">
+        @foreach (var film in Model.Filmek)
+        {
+            <li class="list-group-item">
+                <div class="fw-bold">@film.Title</div>
+                <div class="text-muted small">
+                    Műfaj: @film.Genre; Hossz: @film.DurationInMinutes perc; Rendező: @film.Director; Megjelenés: @film.ReleaseDate.ToString("yyyy.MM.dd.")
+                </div>
+            </li>
+        }
+    </ul>
+}
