@@ -18,6 +18,9 @@
                 @Html.DisplayNameFor(model => model.User[0].PhoneNumber)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.User[0].Password)
+            </th>
+            <th>
                 Szerepek
             </th>
             <th></th>
@@ -36,6 +39,12 @@
                 @Html.DisplayFor(modelItem => item.PhoneNumber)
             </td>
             <td>
+                <div class="input-group">
+                    <input id="pwd-@item.Id" type="password" readonly class="form-control form-control-sm" value="@item.Password" />
+                    <button type="button" class="btn btn-sm btn-outline-secondary toggle-pwd" data-target="#pwd-@item.Id">Mutat</button>
+                </div>
+            </td>
+            <td>
                 @string.Join(", ", item.Roles.Select(r => r.Name))
             </td>
             <td>
@@ -47,3 +56,22 @@
 }
     </tbody>
 </table>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.toggle-pwd').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var selector = btn.getAttribute('data-target');
+                var input = document.querySelector(selector);
+                if (!input) return;
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    btn.textContent = 'Rejt';
+                } else {
+                    input.type = 'password';
+                    btn.textContent = 'Mutat';
+                }
+            });
+        });
+    });
+</script>

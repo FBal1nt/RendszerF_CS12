@@ -24,6 +24,15 @@
             @Html.DisplayFor(model => model.User.PhoneNumber)
         </dd>
         <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.User.Password)
+        </dt>
+        <dd class="col-sm-10">
+            <div class="input-group">
+                <input id="pwd-@Model.User.Id" type="password" readonly class="form-control-plaintext" value="@Model.User.Password" />
+                <button type="button" class="btn btn-sm btn-outline-secondary toggle-pwd" data-target="#pwd-@Model.User.Id">Mutat</button>
+            </div>
+        </dd>
+        <dt class="col-sm-2">
             Szerepek
         </dt>
         <dd class="col-sm-10">
@@ -35,3 +44,22 @@
     <a asp-page="./Edit" asp-route-id="@Model.User.Id">Edit</a> |
     <a asp-page="./Index">Back to List</a>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.toggle-pwd').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var selector = btn.getAttribute('data-target');
+                var input = document.querySelector(selector);
+                if (!input) return;
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    btn.textContent = 'Rejt';
+                } else {
+                    input.type = 'password';
+                    btn.textContent = 'Mutat';
+                }
+            });
+        });
+    });
+</script>

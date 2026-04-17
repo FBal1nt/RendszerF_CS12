@@ -68,6 +68,11 @@ namespace JegyMester.Pages.User
                 userFromDb.Name = User.Name;
                 userFromDb.Email = User.Email;
                 userFromDb.PhoneNumber = User.PhoneNumber;
+                // update password only when a new value was provided
+                if (!string.IsNullOrEmpty(User.Password))
+                {
+                    userFromDb.Password = User.Password;
+                }
 
                 // update roles
                 var roles = SelectedRoleIds?.Any() == true
