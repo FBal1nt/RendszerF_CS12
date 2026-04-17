@@ -23,6 +23,7 @@ public class LoginModel : PageModel
     public async Task<IActionResult> OnPostAsync()
     {
         var user = await _db.Users
+            .Include(u => u.Roles)
             .FirstOrDefaultAsync(u => u.Email == Email);
 
         if (user == null || user.Password != Password)
@@ -31,8 +32,12 @@ public class LoginModel : PageModel
             return Page();
         }
 
-        // Sikeres login → átirányítás
+        // Sikeres login → session beállítása
         HttpContext.Session.SetString("UserEmail", Email);
+        // Jelöljük, ha az user admin szerepű
+        var isAdmin = user.Roles.Any(r => r.Name == "Admin");
+        HttpContext.Session.SetString("IsAdmin", isAdmin ? "true" : "false");
+
         return RedirectToPage("/Index");
     }
 }
