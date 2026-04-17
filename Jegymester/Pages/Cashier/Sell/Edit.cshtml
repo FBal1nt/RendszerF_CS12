@@ -1,0 +1,32 @@
+﻿@page
+@model JegyMester.Pages.Cashier.Sell_ticket.EditModel
+
+@{
+    ViewData["Title"] = "Edit Purchase";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<h1>Edit Purchase #@Model.TicketPurchase.Id</h1>
+
+<form method="post" class="row g-3">
+    <div class="col-md-4">
+        <label class="form-label">Purchase Date</label>
+        <input asp-for="TicketPurchase.PurchaseDateTime" class="form-control" />
+        <span asp-validation-for="TicketPurchase.PurchaseDateTime" class="text-danger"></span>
+    </div>
+
+    <div class="col-md-4">
+        <label class="form-label">User Id</label>
+        <input asp-for="TicketPurchase.UserId" class="form-control" />
+        <span asp-validation-for="TicketPurchase.UserId" class="text-danger"></span>
+    </div>
+
+    <div class="col-12">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a asp-page="./Index" class="btn btn-secondary">Back to List</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
