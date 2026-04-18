@@ -71,9 +71,9 @@ namespace JegyMester.DataContext.Pages
             return RedirectToPage("./Index");
         }
 
-        private bool RoleExists(string id)
+        private bool RoleExists(int id)
         {
-            return _context.Roles.Any(e => e.Id.Equals(id));
+            return _context.Roles.Any(e => e.Id == id);
         }
     }
 }
