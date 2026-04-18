@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using JegyMester.DataContext.Context;
 using JegyMester.DataContext.Entities;
+using Microsoft.AspNetCore.Authorization;
 
 namespace JegyMester.DataContext.Pages
 {
+    [Authorize(Roles = "Admin")]
     public class CreateModel : PageModel
     {
         private readonly JegyMester.DataContext.Context.JegyMesterDbContext _context;

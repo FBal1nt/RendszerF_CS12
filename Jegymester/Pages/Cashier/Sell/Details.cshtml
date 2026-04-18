@@ -1,0 +1,62 @@
+﻿@page
+@model JegyMester.Pages.Cashier.Sell_ticket.DetailsModel
+
+@{
+    ViewData["Title"] = "Purchase Details";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<h1>Purchase #@Model.TicketPurchase.Id</h1>
+
+@if (!string.IsNullOrEmpty(Model.StatusMessage))
+{
+    <div class="alert alert-info">@Model.StatusMessage</div>
+}
+
+<div class="mb-3">
+    <strong>When:</strong> @Model.TicketPurchase.PurchaseDateTime.ToLocalTime().ToString("g")<br />
+    <strong>User:</strong> @Model.TicketPurchase.UserId<br />
+    <strong>Total:</strong> @Model.TicketPurchase.TotalPrice.ToString("C")
+</div>
+
+<h4>Tickets</h4>
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Screening</th>
+            <th>Row</th>
+            <th>Seat</th>
+            <th>Type</th>
+            <th>Price</th>
+            <th>Valid</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var t in Model.TicketPurchase.Tickets) {
+        <tr>
+            <td>@t.Id</td>
+            <td>@(t.Screening != null ? $"{t.Screening.Film?.Title} - {t.Screening.StartTime.ToLocalTime():g}" : "—")</td>
+            <td>@t.Row</td>
+            <td>@t.SeatNumber</td>
+            <td>@t.Type</td>
+            <td>@t.Price.ToString("C")</td>
+            <td>@(t.Valid ? "Yes" : "No")</td>
+            <td>
+                <form method="post" asp-page-handler="ToggleTicketValid" asp-route-ticketId="@t.Id" asp-route-purchaseId="@Model.TicketPurchase.Id" style="display:inline">
+                    <button class="btn btn-sm @(t.Valid ? "btn-warning" : "btn-success")">@((t.Valid) ? "Mark used" : "Revalidate")</button>
+                </form>
+                <form method="post" asp-page-handler="RemoveTicket" asp-route-ticketId="@t.Id" asp-route-purchaseId="@Model.TicketPurchase.Id" style="display:inline" onsubmit="return confirm('Remove this ticket?');">
+                    <button class="btn btn-sm btn-outline-danger">Remove</button>
+                </form>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+<div class="mt-3">
+    <a asp-page="./Index" class="btn btn-secondary">Back</a>
+    <a asp-page="./Edit" asp-route-id="@Model.TicketPurchase.Id" class="btn btn-primary">Edit</a>
+</div>

@@ -1,16 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using JegyMester.DataContext.Context;
+using JegyMester.DataContext.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using JegyMester.DataContext.Context;
-using JegyMester.DataContext.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace JegyMester.DataContext.Pages
 {
+    [Authorize(Roles = "Admin")]
     public class EditModel : PageModel
     {
         private readonly JegyMester.DataContext.Context.JegyMesterDbContext _context;
@@ -23,14 +25,14 @@ namespace JegyMester.DataContext.Pages
         [BindProperty]
         public Role Role { get; set; } = default!;
 
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public async Task<IActionResult> OnGetAsync(string? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var role =  await _context.Roles.FirstOrDefaultAsync(m => m.Id == id);
+            var role =  await _context.Roles.FirstOrDefaultAsync(m => m.Id.Equals(id));
             if (role == null)
             {
                 return NotFound();
@@ -69,9 +71,9 @@ namespace JegyMester.DataContext.Pages
             return RedirectToPage("./Index");
         }
 
-        private bool RoleExists(int id)
+        private bool RoleExists(string id)
         {
-            return _context.Roles.Any(e => e.Id == id);
+            return _context.Roles.Any(e => e.Id.Equals(id));
         }
     }
 }

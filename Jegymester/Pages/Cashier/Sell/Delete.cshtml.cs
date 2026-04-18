@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using JegyMester.DataContext.Context;
-using UserEntity = JegyMester.DataContext.Entities.User;
+using JegyMester.DataContext.Entities;
 
-namespace JegyMester.Pages.User
+namespace JegyMester.Pages.Cashier.Sell_ticket
 {
     public class DeleteModel : PageModel
     {
@@ -20,7 +20,7 @@ namespace JegyMester.Pages.User
         }
 
         [BindProperty]
-        public UserEntity User { get; set; } = default!;
+        public TicketPurchase TicketPurchase { get; set; } = default!;
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -29,11 +29,11 @@ namespace JegyMester.Pages.User
                 return NotFound();
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(m => m.Id.Equals(id));
+            var ticketpurchase = await _context.TicketPurchases.FirstOrDefaultAsync(m => m.Id == id);
 
-            if (user is not null)
+            if (ticketpurchase is not null)
             {
-                User = user;
+                TicketPurchase = ticketpurchase;
 
                 return Page();
             }
@@ -48,11 +48,11 @@ namespace JegyMester.Pages.User
                 return NotFound();
             }
 
-            var user = await _context.Users.FindAsync(id);
-            if (user != null)
+            var ticketpurchase = await _context.TicketPurchases.FindAsync(id);
+            if (ticketpurchase != null)
             {
-                User = user;
-                _context.Users.Remove(User);
+                TicketPurchase = ticketpurchase;
+                _context.TicketPurchases.Remove(TicketPurchase);
                 await _context.SaveChangesAsync();
             }
 
