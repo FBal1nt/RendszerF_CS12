@@ -28,19 +28,19 @@ namespace JegyMester.Pages.Cashier
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null) { Ticket = new Ticket { Id = 0, Price = 0, Row = 0, ScreeningId = 0, SeatNumber = 0, Screening = _context.Screenings.FirstOrDefault(), TicketPurchase = _context.TicketPurchases.FirstOrDefault(), TicketPurchaseId = 0, Type = DataContext.Enums.TicketType.Child, Valid = false}; return Page(); }
 
             var ticket = await _context.Tickets
                 .Include(t => t.Screening)
                 .Include(t => t.TicketPurchase)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (ticket is null) return NotFound();
+            if (ticket is null) { Ticket = new Ticket { Id = 0, Price = 0, Row = 0, ScreeningId = 0, SeatNumber = 0, Screening = _context.Screenings.FirstOrDefault(), TicketPurchase = _context.TicketPurchases.FirstOrDefault(), TicketPurchaseId = 0, Type = DataContext.Enums.TicketType.Child, Valid = false }; return Page(); }
 
             Ticket = ticket;
             return Page();
         }
-
+        
         // Atomic verify + mark-used using conditional UPDATE
         public async Task<IActionResult> OnPostVerifyAsync(int? id)
         {
