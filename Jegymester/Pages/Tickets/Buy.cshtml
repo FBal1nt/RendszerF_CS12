@@ -1,0 +1,48 @@
+﻿@page "{id:int}"
+@model JegyMester.Pages.Tickets.BuyModel
+
+<h2>Jegyvásárlás</h2>
+<hr />
+
+@if (Model.Screening == null)
+{
+    <p class="text-danger">A vetítés nem található.</p>
+}
+else
+{
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4>@Model.Screening.Film.Title</h4>
+            <p>
+                <strong>Időpont:</strong> @Model.Screening.StartTime.ToString("yyyy.MM.dd. HH:mm") <br />
+                <strong>Terem:</strong> @Model.Screening.Room.Id
+            </p>
+        </div>
+    </div>
+
+    <form method="post">
+        <input type="hidden" asp-for="ScreeningId" />
+
+        <div class="mb-3">
+            <label class="form-label">Jegytípus</label>
+            <select asp-for="SelectedType" class="form-select">
+                @foreach (var type in Enum.GetValues(typeof(JegyMester.DataContext.Enums.TicketType)))
+                {
+                    <option value="@type">@type</option>
+                }
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Sor</label>
+            <input asp-for="Row" class="form-control" type="number" min="1" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Szék</label>
+            <input asp-for="SeatNumber" class="form-control" type="number" min="1" />
+        </div>
+
+        <button type="submit" class="btn btn-success">Jegy megvásárlása</button>
+    </form>
+}

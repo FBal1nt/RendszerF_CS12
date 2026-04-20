@@ -1,0 +1,30 @@
+﻿@page
+@model JegyMester.Pages.Tickets.MyTicketsModel
+
+<h2>Jegyvásárlásaim</h2>
+<hr />
+
+@if (!Model.Purchases.Any())
+{
+    <p>Még nincs jegyvásárlásod.</p>
+}
+else
+{
+    @foreach (var purchase in Model.Purchases)
+    {
+        <h5>Vásárlás: @purchase.PurchaseDateTime.ToString("yyyy.MM.dd. HH:mm")</h5>
+        <ul class="list-group mb-3">
+            @foreach (var t in purchase.Tickets)
+            {
+                <li class="list-group-item">
+                    <strong>@t.Screening.Film.Title</strong><br />
+                    Időpont: @t.Screening.StartTime.ToString("yyyy.MM.dd. HH:mm")<br />
+                    Terem: @t.Screening.Room.Id<br />
+                    Sor: @t.Row, Szék: @t.SeatNumber<br />
+                    Típus: @t.Name<br />
+                    Ár: @t.Price Ft
+                </li>
+            }
+        </ul>
+    }
+}

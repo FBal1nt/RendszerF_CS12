@@ -33,11 +33,14 @@ public class LoginModel : PageModel
         }
 
         // Sikeres login → session beállítása
-        HttpContext.Session.SetString("UserEmail", Email);
-        // Jelöljük, ha az user admin szerepű
+        HttpContext.Session.SetString("UserId", user.Id.ToString());
+        HttpContext.Session.SetString("UserEmail", user.Email);
+
+        // Admin szerep mentése
         var isAdmin = user.Roles.Any(r => r.Name == "Admin");
         HttpContext.Session.SetString("IsAdmin", isAdmin ? "true" : "false");
 
         return RedirectToPage("/Index");
     }
+
 }

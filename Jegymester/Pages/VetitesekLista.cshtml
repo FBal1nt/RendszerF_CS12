@@ -21,6 +21,14 @@ else
                     Kezdés: @v.StartTime.ToString("yyyy.MM.dd. HH:mm")<br />
                     Befejezés: @v.EndTime.ToString("yyyy.MM.dd. HH:mm")
                 </div>
+
+                <div class="mt-2">
+                    <a asp-page="/Tickets/Buy"
+                           asp-route-id="@v.Id"
+                           class="btn btn-success btn-sm">
+                        Jegyvásárlás
+                    </a>
+                </div>
             </li>
         }
     </ul>
