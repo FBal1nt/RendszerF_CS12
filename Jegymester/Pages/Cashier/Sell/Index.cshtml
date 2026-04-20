@@ -1,0 +1,65 @@
+﻿@page
+@model JegyMester.Pages.Cashier.Sell_ticket.IndexModel
+
+@{
+    ViewData["Title"] = "Ticket Purchases";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<h1>Ticket Purchases</h1>
+
+@if (!string.IsNullOrEmpty(Model.StatusMessage))
+{
+    <div class="alert alert-info">@Model.StatusMessage</div>
+}
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <input asp-for="Search" class="form-control" placeholder="Search by user id, purchase id or film title" />
+    </div>
+    <div class="col-auto">
+        <input asp-for="From" type="date" class="form-control" />
+    </div>
+    <div class="col-auto">
+        <input asp-for="To" type="date" class="form-control" />
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-primary" type="submit">Filter</button>
+        <a class="btn btn-outline-secondary" asp-page="./Index">Clear</a>
+    </div>
+    <div class="col-auto ms-auto">
+        <a asp-page="./Create" class="btn btn-success">Create Sale</a>
+        <a asp-page="/Cashier/Index" class="btn btn-outline-secondary ms-2">Back to Cashier</a>
+    </div>
+</form>
+
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>When</th>
+            <th>User</th>
+            <th>Tickets</th>
+            <th>Total</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var p in Model.TicketPurchases) {
+        <tr>
+            <td>@p.Id</td>
+            <td>@p.PurchaseDateTime.ToLocalTime().ToString("g")</td>
+            <td>@p.UserId</td>
+            <td>@p.Tickets?.Count() ?? 0</td>
+            <td>@p.TotalPrice.ToString("C")</td>
+            <td>
+                <a asp-page="./Details" asp-route-id="@p.Id" class="btn btn-sm btn-outline-primary">Details</a>
+                <a asp-page="./Edit" asp-route-id="@p.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
+                <form method="post" asp-page-handler="Revert" asp-route-id="@p.Id" style="display:inline" onsubmit="return confirm('Revert purchase and free seats?');">
+                    <button type="submit" class="btn btn-sm btn-danger">Revert</button>
+                </form>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
