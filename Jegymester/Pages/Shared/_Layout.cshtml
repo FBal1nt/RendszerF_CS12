@@ -34,6 +34,12 @@
                                 <a class="nav-link text-dark" asp-area="" asp-page="/AdminIndex">Admin</a>
                             </li>
                         }
+                        @if (HttpContextAccessor.HttpContext.Session.GetString("IsCashier") == "true")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Cashier/Index">Cashier</a>
+                            </li>
+                        }
                         @if (HttpContextAccessor.HttpContext.Session.GetString("UserEmail") == null)
                         {
                             <li class="nav-item">
