@@ -8,15 +8,14 @@ using Microsoft.Extensions.Logging;
 using JegyMester.DataContext.Context;
 using JegyMester.DataContext.Entities;
 
-namespace JegyMester.Pages.Cashier.Verification
+namespace JegyMester.Pages.Cashier
 {
-    [Authorize(Roles = "Cashier")]
-    public class Verify_TicketModel : PageModel
+    public class VerificationModel : PageModel
     {
         private readonly JegyMesterDbContext _context;
-        private readonly ILogger<Verify_TicketModel> _logger;
+        private readonly ILogger<VerificationModel> _logger;
 
-        public Verify_TicketModel(JegyMesterDbContext context, ILogger<Verify_TicketModel> logger)
+        public VerificationModel(JegyMesterDbContext context, ILogger<VerificationModel> logger)
         {
             _context = context;
             _logger = logger;
