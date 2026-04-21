@@ -21,7 +21,7 @@ namespace JegyMester.Pages.Screening
 
         public IActionResult OnGet()
         {
-        ViewData["FilmId"] = new SelectList(_context.Films, "Id", "Director");
+        ViewData["FilmId"] = new SelectList(_context.Films, "Id", "Title");
         ViewData["RoomId"] = new SelectList(_context.Rooms, "Id", "Id");
             return Page();
         }
