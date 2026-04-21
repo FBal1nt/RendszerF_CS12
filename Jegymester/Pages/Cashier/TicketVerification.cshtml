@@ -1,0 +1,94 @@
+﻿@page 
+@model JegyMester.Pages.Cashier.VerificationModel
+
+@{
+    ViewData["Title"] = "Verify Tickets";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<h1>Verify Tickets</h1>
+
+@if (!string.IsNullOrEmpty(Model.StatusMessage))
+{
+    <div class="alert alert-info" role="alert">@Model.StatusMessage</div>
+}
+
+<div>
+    <h4>Tickets</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Ticket.Type)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Ticket.Type)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Ticket.Valid)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Ticket.Valid)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Ticket.Price)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Ticket.Price)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Ticket.Row)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Ticket.Row)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Ticket.SeatNumber)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Ticket.SeatNumber)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Ticket.Screening)
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.Ticket.Screening != null)
+            {
+                <span>
+                    @Html.DisplayFor(m => m.Ticket.Screening.Id)
+                    &ndash;
+                    @Model.Ticket.Screening.StartTime.ToString("g")
+                </span>
+            }
+            else
+            {
+                <span>—</span>
+            }
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Ticket.TicketPurchase)
+        </dt>
+        <dd class="col-sm-10">
+            @if (Model.Ticket.TicketPurchase != null)
+            {
+                @Html.DisplayFor(m => m.Ticket.TicketPurchase.Id)
+            }
+            else
+            {
+                <span>—</span>
+            }
+        </dd>
+    </dl>
+</div>
+
+<div class="mb-3">
+    <form method="post" asp-page-handler="Verify" asp-route-id="@Model.Ticket?.Id" style="display:inline">
+        <button class="btn btn-primary" type="submit" @(Model.Ticket?.Valid == true ? "" : "disabled")>Verify Ticket</button>
+    </form>
+    <form method="post">
+        <input type="number" asp-for="BevittSzam" />
+        <!-- Ez az OnPostKeres metódust hívja meg -->
+        <button type="submit" asp-page-handler="Keres">Lekérdezés</button>
+
+    </form>
+    <a asp-page="/Cashier/Index" class="btn btn-secondary">Back to Cashier</a>
+</div>

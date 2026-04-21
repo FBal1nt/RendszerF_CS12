@@ -39,6 +39,9 @@ public class LoginModel : PageModel
         // Admin szerep mentése
         var isAdmin = user.Roles.Any(r => r.Name == "Admin");
         HttpContext.Session.SetString("IsAdmin", isAdmin ? "true" : "false");
+        // Jelöljük, ha az user cashier szerepű
+        var isCashier = user.Roles.Any(r => r.Name == "Cashier");
+        HttpContext.Session.SetString("IsCashier", isCashier ? "true" : "false");
 
         return RedirectToPage("/Index");
     }

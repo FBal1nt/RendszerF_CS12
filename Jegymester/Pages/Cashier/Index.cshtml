@@ -1,0 +1,13 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<h3>Cashier</h3>
+<hr />
+<div class="btn-group-vertical" role="group" aria-label="Cashier navigation">
+    <a asp-page="./Sell/Index" class="btn btn-primary">Buy ticket</a>
+    <a asp-page="./TicketVerification" class="btn btn-primary">Verify ticket</a>
+</div>
+
