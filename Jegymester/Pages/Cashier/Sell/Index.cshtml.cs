@@ -43,7 +43,15 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
             if (!string.IsNullOrWhiteSpace(Search))
             {
                 // allow searching by user id or purchase id
-                if (int.TryParse(Search, out var n))
+                if (Search.Contains("@"))
+                {
+                    var user = _context.Users.Where(f => f.Email.Contains(Search.ToString())).FirstOrDefault();Console.WriteLine($"=========================================={user.Name}========================================");
+                    if (user != null)
+                    {
+                        q = q.Where(tp => tp.UserId == user.Id);
+                    }
+                }
+                else if (int.TryParse(Search, out var n))
                 {
                     q = q.Where(tp => tp.UserId == n || tp.Id == n);
                 }
