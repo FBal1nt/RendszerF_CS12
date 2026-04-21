@@ -4,10 +4,14 @@
 <h2>Jegyvásárlás</h2>
 <hr />
 
-@if (Model.Screening == null)
+@if (Model.Screening.StartTime <= DateTime.Now)
 {
-    <p class="text-danger">A vetítés nem található.</p>
+    <div class="alert alert-danger">
+        Ez a vetítés már elkezdődött vagy lejárt, jegyvásárlás nem lehetséges.
+    </div>
+    <a class="btn btn-secondary mt-2" href="/VetitesekLista">Vissza a vetítésekhez</a>
 }
+
 else
 {
     <div class="card mb-4">
@@ -50,18 +54,3 @@ else
         <button type="submit" class="btn btn-success">Jegy megvásárlása</button>
     </form>
 }
-
-<script>
-    const prices = {
-        "Adult": 2000,
-        "Student": 1500,
-        "Child": 1200,
-        "Senior": 1500,
-        "VIP": 3500
-    };
-
-    document.getElementById("ticketType").addEventListener("change", function () {
-        const selected = this.value;
-        document.getElementById("ticketPrice").innerText = prices[selected];
-    });
-</script>

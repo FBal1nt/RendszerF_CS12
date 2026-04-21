@@ -20,6 +20,8 @@ namespace JegyMester.Pages.Tickets
 
         [BindProperty]
         public int ScreeningId { get; set; }
+        public bool IsExpired => Screening != null && Screening.StartTime <= DateTime.Now;
+
 
         [BindProperty]
         public TicketType SelectedType { get; set; }
@@ -46,6 +48,7 @@ namespace JegyMester.Pages.Tickets
             return Page();
         }
 
+
         public async Task<IActionResult> OnPostAsync()
         {
             var userIdString = HttpContext.Session.GetString("UserId");
@@ -59,6 +62,11 @@ namespace JegyMester.Pages.Tickets
                 .Include(s => s.Film)
                 .Include(s => s.Room)
                 .FirstOrDefaultAsync(s => s.Id == ScreeningId);
+            if (screening.StartTime <= DateTime.Now)
+            {
+                TempData["Error"] = "Ez a vetítés már elkezdődött vagy lejárt, jegyvásárlás nem lehetséges.";
+            }
+
 
             if (screening == null)
                 return NotFound();
