@@ -25,12 +25,16 @@ else
 
         <div class="mb-3">
             <label class="form-label">Jegytípus</label>
-            <select asp-for="SelectedType" class="form-select">
+            <select asp-for="SelectedType" class="form-select" id="ticketType">
                 @foreach (var type in Enum.GetValues(typeof(JegyMester.DataContext.Enums.TicketType)))
                 {
                     <option value="@type">@type</option>
                 }
             </select>
+        </div>
+
+        <div class="alert alert-info">
+            <strong>Jegy ára:</strong> <span id="ticketPrice">@Model.CurrentPrice</span> Ft
         </div>
 
         <div class="mb-3">
@@ -46,3 +50,18 @@ else
         <button type="submit" class="btn btn-success">Jegy megvásárlása</button>
     </form>
 }
+
+<script>
+    const prices = {
+        "Adult": 2000,
+        "Student": 1500,
+        "Child": 1200,
+        "Senior": 1500,
+        "VIP": 3500
+    };
+
+    document.getElementById("ticketType").addEventListener("change", function () {
+        const selected = this.value;
+        document.getElementById("ticketPrice").innerText = prices[selected];
+    });
+</script>

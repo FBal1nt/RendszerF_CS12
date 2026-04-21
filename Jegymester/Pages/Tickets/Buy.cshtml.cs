@@ -29,6 +29,7 @@ namespace JegyMester.Pages.Tickets
 
         [BindProperty]
         public int SeatNumber { get; set; }
+        public decimal CurrentPrice => GetPrice(SelectedType);
 
         public async Task<IActionResult> OnGetAsync(int id)
         {

@@ -4,6 +4,21 @@
 <h2>Jegyvásárlásaim</h2>
 <hr />
 
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Message"]
+    </div>
+}
+
+
 @if (!Model.Purchases.Any())
 {
     <p>Még nincs jegyvásárlásod.</p>
@@ -23,7 +38,14 @@ else
                     Sor: @t.Row, Szék: @t.SeatNumber<br />
                     Típus: @t.Name<br />
                     Ár: @t.Price Ft
+
+                    <form method="post" asp-page-handler="Delete" asp-route-ticketId="@t.Id" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm mt-2">Törlés</button>
+                    </form>
                 </li>
+
+                
+
             }
         </ul>
     }
