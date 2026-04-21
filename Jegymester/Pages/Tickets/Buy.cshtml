@@ -11,7 +11,6 @@
     </div>
     <a class="btn btn-secondary mt-2" href="/VetitesekLista">Vissza a vetítésekhez</a>
 }
-
 else
 {
     <div class="card mb-4">
@@ -24,12 +23,68 @@ else
         </div>
     </div>
 
+    <h4>Helyfoglalás</h4>
+
+    
+        int seatsPerRow = 10;
+        int totalSeats = Model.Screening.Room.Capacity;
+        int totalRows = (int)Math.Ceiling(totalSeats / (double)seatsPerRow);
+    
+
+    <table class="table table-bordered text-center" style="max-width: 600px;">
+        @for (int r = 1; r <= totalRows; r++)
+        {
+            <tr>
+                @for (int s = 1; s <= seatsPerRow; s++)
+                {
+                    int seatNumber = (r - 1) * seatsPerRow + s;
+
+                    if (seatNumber > totalSeats)
+                    {
+                        <td></td>
+                        continue;
+                    }
+
+                    bool taken = Model.TakenSeats.Any(ts => ts.Row == r && ts.Seat == seatNumber);
+
+                    <td style="padding: 6px;">
+                        @if (taken)
+                        {
+                            <span class="badge bg-danger">X</span>
+                        }
+                        else
+                        {
+                            <button type="button"
+                                    class="btn btn-success btn-sm"
+                                    onclick="selectSeat(@r, @seatNumber, @s)">
+                                @s
+                            </button>
+                        }
+                    </td>
+                }
+            </tr>
+        }
+    </table>
+
+    <script>
+        function selectSeat(row, seatNumber, column) {
+            document.getElementById("rowInput").value = row;
+            document.getElementById("columnInput").value = column;
+            document.getElementById("seatNumberHidden").value = seatNumber;
+
+            alert(`Kiválasztott hely: Sor ${row}, Oszlop ${column}`);
+        }
+    </script>
+
     <form method="post">
         <input type="hidden" asp-for="ScreeningId" />
 
+        <!-- A backendnek küldött seatNumber -->
+        <input type="hidden" id="seatNumberHidden" name="SeatNumber" />
+
         <div class="mb-3">
             <label class="form-label">Jegytípus</label>
-            <select asp-for="SelectedType" class="form-select" id="ticketType">
+            <select asp-for="SelectedType" class="form-select">
                 @foreach (var type in Enum.GetValues(typeof(JegyMester.DataContext.Enums.TicketType)))
                 {
                     <option value="@type">@type</option>
@@ -43,13 +98,26 @@ else
 
         <div class="mb-3">
             <label class="form-label">Sor</label>
-            <input asp-for="Row" class="form-control" type="number" min="1" />
+            <input class="form-control" id="rowInput" asp-for="Row" readonly />
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Szék</label>
-            <input asp-for="SeatNumber" class="form-control" type="number" min="1" />
+            <label class="form-label">Oszlop</label>
+            <input class="form-control" id="columnInput" readonly />
         </div>
+
+        @if (HttpContext.Session.GetString("UserId") == null)
+        {
+            <div class="mb-3">
+                <label class="form-label">E-mail cím (vendég vásárlás)</label>
+                <input asp-for="GuestEmail" class="form-control" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Telefonszám (vendég vásárlás)</label>
+                <input asp-for="GuestPhone" class="form-control" required />
+            </div>
+        }
 
         <button type="submit" class="btn btn-success">Jegy megvásárlása</button>
     </form>

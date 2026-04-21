@@ -6,7 +6,9 @@
         public DateTime PurchaseDateTime { get; set; }
         public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
         public decimal TotalPrice => Tickets?.Sum(t => t.Price) ?? 0;
-        public int UserId { get; set; }
+        public int? UserId { get; set; }
         public User? User { get; set; }
+        public string? GuestEmail { get; set; }
+        public string? GuestPhone { get; set; }
     }
 }
