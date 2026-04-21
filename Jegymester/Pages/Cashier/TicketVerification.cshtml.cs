@@ -26,6 +26,9 @@ namespace JegyMester.Pages.Cashier
         [TempData]
         public string? StatusMessage { get; set; }
 
+        [BindProperty]
+        public int BevittSzam { get; set; }
+
         public async Task<IActionResult> OnGetAsync()
         {
             var ticket =  new Ticket { Id = 0, Price = 0, Row = 0, ScreeningId = 0, SeatNumber = 0, Screening = _context.Screenings.FirstOrDefault(), TicketPurchase = _context.TicketPurchases.FirstOrDefault(), TicketPurchaseId = 0, Type = DataContext.Enums.TicketType.Child, Valid = false };
@@ -115,6 +118,16 @@ namespace JegyMester.Pages.Cashier
 
             // If using barcode strings, replace above logic to search by barcode column.
             return new JsonResult(new { ok = false, message = "Unsupported code format" });
+        }
+        public async Task<IActionResult> OnPostKeresAsync()
+        {
+            // Példa aszinkron adatbázis lekérdezésre
+            Ticket = await _context.Tickets.FirstOrDefaultAsync(x => x.Id == BevittSzam);
+
+            if (Ticket is null)
+                Ticket = new Ticket { Id = 0, Price = 0, Row = 0, ScreeningId = 0, SeatNumber = 0, Screening = _context.Screenings.FirstOrDefault(), TicketPurchase = _context.TicketPurchases.FirstOrDefault(), TicketPurchaseId = 0, Type = DataContext.Enums.TicketType.Child, Valid = false };
+
+            return Page(); // Maradunk ugyanazon az oldalon
         }
     }
 }

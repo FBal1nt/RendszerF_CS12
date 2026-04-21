@@ -84,5 +84,11 @@
     <form method="post" asp-page-handler="Verify" asp-route-id="@Model.Ticket?.Id" style="display:inline">
         <button class="btn btn-primary" type="submit" @(Model.Ticket?.Valid == true ? "" : "disabled")>Verify Ticket</button>
     </form>
+    <form method="post">
+        <input type="number" asp-for="BevittSzam" />
+        <!-- Ez az OnPostKeres metódust hívja meg -->
+        <button type="submit" asp-page-handler="Keres">Lekérdezés</button>
+
+    </form>
     <a asp-page="/Cashier/Index" class="btn btn-secondary">Back to Cashier</a>
 </div>
