@@ -33,6 +33,9 @@ namespace JegyMester.Pages.Tickets
                     .ThenInclude(s => s.Film)
             .Include(tp => tp.Tickets)
                 .ThenInclude(t => t.Screening.Room)
+            .Include(tp => tp.Tickets)
+                 .ThenInclude(t => t.Screening.Room.Cinema)
+
             .Where(tp =>
                 tp.UserId == userId &&
                 tp.Tickets.Any(t =>
