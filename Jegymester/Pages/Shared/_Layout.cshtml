@@ -40,6 +40,13 @@
                                 <a class="nav-link text-dark" asp-area="" asp-page="/Cashier/Index">Cashier</a>
                             </li>
                         }
+                        @* Áthelyeztem ide hogy a bejelentkezett felhasználók is tudják a vetítések és a filmek fület megnézni*@
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/FilmekLista">Filmek</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/VetitesekLista">Vetítések</a>
+                        </li>
                         @if (HttpContextAccessor.HttpContext.Session.GetString("UserEmail") == null)
                         {
                             <li class="nav-item">
@@ -50,13 +57,6 @@
                             </li>
                             
                         }
-                        @* Áthelyeztem ide hogy a bejelentkezett felhasználók is tudják a vetítések és a filmek fület megnézni*@
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/FilmekLista">Filmek</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/VetitesekLista">Vetítések</a>
-                        </li>
                         
                         
                     </ul>
