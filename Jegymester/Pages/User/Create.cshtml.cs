@@ -55,7 +55,6 @@ namespace JegyMester.Pages.User
             {
                 ModelState.AddModelError("User.Email", "Ezzel az email címmel már létezik felhasználó.");
 
-                // Fontos: Itt is újra fel kell tölteni a listát a checkboxokhoz!
                 AllRoles = await _context.Roles.ToListAsync();
                 return Page();
             }
