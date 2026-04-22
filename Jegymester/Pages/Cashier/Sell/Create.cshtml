@@ -64,8 +64,8 @@
                 typeSelect.className = 'form-select';
                 typeSelect.name = `Items[${index}].Type`;
 
-                const types = @Html.Raw(Json.Serialize(Enum.GetValues(typeof(TicketType))));
-
+                const types = @Html.Raw(Json.Serialize(Enum.GetNames(typeof(TicketType))));
+                
                 types.forEach((t, i) => {
                     const opt = document.createElement('option');
                     opt.value = i;

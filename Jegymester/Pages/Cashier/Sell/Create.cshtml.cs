@@ -142,7 +142,6 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
             }
             catch (DbUpdateException ex)
             {
-                Console.WriteLine(ex.InnerException?.Message+"  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5");
                 await tx.RollbackAsync();
                 ModelState.AddModelError(string.Empty, "Failed to complete sale. Please try again.");
                 await OnGetAsync();
@@ -162,16 +161,16 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
             return Page();
         }
 
-        private decimal CalculatePrice(TicketType type)
+        private int CalculatePrice(TicketType type)
         {
             return type switch
             {
-                TicketType.Adult => 100m,
-                TicketType.Student => 80m,
-                TicketType.Child => 60m,
-                TicketType.Senior => 70m,
-                TicketType.VIP => 200m,
-                _ => 100m
+                TicketType.Adult => 2000,
+                TicketType.Student => 1500,
+                TicketType.Child => 1200,
+                TicketType.Senior => 1500,
+                TicketType.VIP => 3500,
+                _ => 2000
             };
         }
     }
