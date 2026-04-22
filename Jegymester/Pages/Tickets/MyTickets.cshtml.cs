@@ -28,14 +28,23 @@ namespace JegyMester.Pages.Tickets
             int userId = int.Parse(userIdString);
 
             Purchases = await _context.TicketPurchases
-                .Include(tp => tp.Tickets)
-                    .ThenInclude(t => t.Screening)
-                        .ThenInclude(s => s.Film)
-                .Include(tp => tp.Tickets)
-                    .ThenInclude(t => t.Screening.Room)
-                .Where(tp => tp.UserId == userId)
-                .OrderByDescending(tp => tp.PurchaseDateTime)
-                .ToListAsync();
+            .Include(tp => tp.Tickets)
+                .ThenInclude(t => t.Screening)
+                    .ThenInclude(s => s.Film)
+            .Include(tp => tp.Tickets)
+                .ThenInclude(t => t.Screening.Room)
+            .Where(tp =>
+                tp.UserId == userId &&
+                tp.Tickets.Any(t =>
+                    t.Valid == true &&
+                    t.Screening != null &&
+                    t.Screening.Film != null &&
+                    t.Screening.Room != null
+                )
+            )
+            .OrderByDescending(tp => tp.PurchaseDateTime)
+            .ToListAsync();
+
             return Page();
         }
         public async Task<IActionResult> OnPostDeleteAsync(int ticketId)
