@@ -43,30 +43,26 @@ public class ProfileModel : PageModel
             return RedirectToPage("/Login");
 
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == sessionEmail);
-        
+
         if (user == null)
             return RedirectToPage("/Login");
+
         if (string.IsNullOrWhiteSpace(Email))
         {
             Message = "Az email cím nem lehet üres.";
             return Page();
         }
-        if (string.IsNullOrWhiteSpace(Password))
-        {
-            Message = "A jelszó nem lehet üres.";
-            return Page();
-        }
-        // Adatok frissítése
+
+        // Név, email, telefon frissítése
         user.Name = Name;
         user.Email = Email;
         user.PhoneNumber = PhoneNumber;
 
-        // Jelszó frissítése, ha meg van adva
+        // Jelszó csak akkor frissül, ha NEM üres
         if (!string.IsNullOrWhiteSpace(Password))
         {
-            user.Password = Password; // később hash-elünk
+            user.Password = Password; // később hash-elhető
         }
-
 
         await _db.SaveChangesAsync();
 
@@ -77,4 +73,5 @@ public class ProfileModel : PageModel
 
         return Page();
     }
+
 }
