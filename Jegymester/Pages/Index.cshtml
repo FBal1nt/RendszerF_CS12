@@ -1,11 +1,45 @@
 ﻿@page
 @model IndexModel
-@{
-    ViewData["Title"] = "Home page";
-}
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-    <!-- Admin navigation buttons removed from main Index as requested -->
+<div class="container mt-5">
+
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold">🎬 Üdv a JegyMesterben!</h1>
+        <p class="lead text-muted">Foglalj helyet a legjobb filmekre, gyorsan és egyszerűen.</p>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h3 class="card-title">🎞 Filmek</h3>
+                    <p class="card-text">Böngéssz a jelenleg futó filmek között.</p>
+                    <a href="/FilmekLista" class="btn btn-primary">Megnyitás</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h3 class="card-title">🕒 Vetítések</h3>
+                    <p class="card-text">Nézd meg a közelgő előadásokat.</p>
+                    <a href="/VetitesekLista" class="btn btn-primary">Megnyitás</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h3 class="card-title">🎫 Jegyeim</h3>
+                    <p class="card-text">Korábbi vásárlásaid egy helyen.</p>
+                    <a href="/Tickets/MyTickets" class="btn btn-primary">Megnyitás</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
 </div>
