@@ -47,6 +47,7 @@
             const container = document.getElementById('rowsContainer');
             const screeningSelect = document.getElementById('screeningSelect');
             const addBtn = document.getElementById('addRowBtn');
+            const removeBtn = document.getElementById('Remove');
 
             let index = 0;
 
@@ -57,7 +58,7 @@
                 const screeningInput = document.createElement('input');
                 screeningInput.type = 'hidden';
                 screeningInput.name = `Items[${index}].ScreeningId`;
-                screeningInput.value = initialScreeningId || '';
+                screeningInput.value = screeningSelect.value;
 
                 const typeSelect = document.createElement('select');
                 typeSelect.className = 'form-select';
@@ -75,14 +76,19 @@
                 const rowInput = document.createElement('input');
                 rowInput.type = 'number';
                 rowInput.name = `Items[${index}].Row`;
+                rowInput.className = 'form-control';
+                rowInput.required = true;
 
                 const seatInput = document.createElement('input');
                 seatInput.type = 'number';
                 seatInput.name = `Items[${index}].SeatNumber`;
+                seatInput.className = 'form-control';
+                seatInput.required = true;
 
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
                 removeBtn.textContent = 'Remove';
+                removeBtn.id = 'Remove';
                 removeBtn.onclick = () => row.remove();
 
                 row.appendChild(screeningInput);
@@ -106,6 +112,36 @@
                 const newRow = createRow(screenId);
                 container.appendChild(newRow);
             });
+
+            document.getElementById("sellForm").addEventListener("submit", function () {
+            const rows = container.children;
+
+            for (let i = 0; i < rows.length; i++) {
+                const hidden = rows[i].querySelector(`input[name^="Items"][name$=".ScreeningId"]`);
+                hidden.value = screeningSelect.value;
+            }
+});
+                    document.getElementById("sellForm").addEventListener("submit", function (e) {
+                    if (container.children.length === 0) {
+                        e.preventDefault();
+                        alert("Add at least one ticket!");
+                    }
+        });
+
+        function reindex() {
+            const rows = container.children;
+            for (let i = 0; i < rows.length; i++) {
+                rows[i].querySelectorAll("input, select").forEach(el => {
+                    el.name = el.name.replace(/Items\[\d+\]/, `Items[${i}]`);
+                });
+            }
+            index = rows.length;
+}
+
+        removeBtn.onclick = () => {
+            row.remove();
+            reindex();
+        };
 
         });
 </script>

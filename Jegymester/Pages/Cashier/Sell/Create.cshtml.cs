@@ -140,8 +140,9 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
 
                 return RedirectToPage("./Details", new { id = purchase.Id });
             }
-            catch (DbUpdateException)
+            catch (DbUpdateException ex)
             {
+                Console.WriteLine(ex.InnerException?.Message+"  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5");
                 await tx.RollbackAsync();
                 ModelState.AddModelError(string.Empty, "Failed to complete sale. Please try again.");
                 await OnGetAsync();
