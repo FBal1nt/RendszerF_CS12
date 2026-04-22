@@ -11,6 +11,7 @@
 <h1>Sell Tickets</h1>
 
 <form method="post" id="sellForm">
+    @Html.AntiForgeryToken()
     <div class="mb-3">
         <label class="form-label">Screening</label>
         <select id="screeningSelect" class="form-select">
@@ -22,17 +23,15 @@
         </select>
     </div>
 
-    <div id="rowsContainer" class="mb-3">
-        <!-- dynamic ticket rows will be inserted here -->
+    <div>
+    <button type="button" id="addRowBtn" class="btn btn-success">Add Ticket</button>
     </div>
 
-    <div class="mb-3">
-        <button id="addRow" type="button" class="btn btn-outline-primary">Add Ticket</button>
-    </div>
+    <div id="rowsContainer" class="mb-3"></div>
 
     <div class="mb-3">
         <label>User Id (cashier or guest)</label>
-        <input asp-for="TicketPurchase.UserId" class="form-control" />
+        <input asp-for="ticketPurchase.UserId" class="form-control" />
     </div>
 
     <div class="mb-3">
@@ -43,97 +42,71 @@
 
 @section Scripts {
 <script>
-(function () {
-    const container = document.getElementById('rowsContainer');
-    const addBtn = document.getElementById('addRow');
-    const screeningSelect = document.getElementById('screeningSelect');
+        document.addEventListener("DOMContentLoaded", function () {
 
-    let index = 0;
+            const container = document.getElementById('rowsContainer');
+            const screeningSelect = document.getElementById('screeningSelect');
+            const addBtn = document.getElementById('addRowBtn');
 
-    function createRow(initialScreeningId) {
-        const row = document.createElement('div');
-        row.className = 'd-flex gap-2 align-items-end mb-2';
+            let index = 0;
 
-        // ScreeningId (hidden input)
-        const screeningInput = document.createElement('input');
-        screeningInput.type = 'hidden';
-        screeningInput.name = `Items[${index}].ScreeningId`;
-        screeningInput.value = initialScreeningId || '';
+            function createRow(initialScreeningId) {
+                const row = document.createElement('div');
+                row.className = 'd-flex gap-2 align-items-end mb-2';
 
-        // Type select
-        const typeSelect = document.createElement('select');
-        typeSelect.className = 'form-select';
-        typeSelect.name = `Items[${index}].Type`;
-        typeSelect.style.width = '180px';
-        @* Populate type options *@
-        const types = [@String.Join(", ", Enum.GetValues(typeof(TicketType)).Cast<TicketType>().Select(t => $"{{ id: {(int)t}, name: '{t}' }}"))];
-        // Build options
-        (function() {
-            types.forEach(t => {
-                const opt = document.createElement('option');
-                opt.value = t.id;
-                opt.textContent = t.name;
-                typeSelect.appendChild(opt);
+                const screeningInput = document.createElement('input');
+                screeningInput.type = 'hidden';
+                screeningInput.name = `Items[${index}].ScreeningId`;
+                screeningInput.value = initialScreeningId || '';
+
+                const typeSelect = document.createElement('select');
+                typeSelect.className = 'form-select';
+                typeSelect.name = `Items[${index}].Type`;
+
+                const types = @Html.Raw(Json.Serialize(Enum.GetValues(typeof(TicketType))));
+
+                types.forEach((t, i) => {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.textContent = t;
+                    typeSelect.appendChild(opt);
+                });
+
+                const rowInput = document.createElement('input');
+                rowInput.type = 'number';
+                rowInput.name = `Items[${index}].Row`;
+
+                const seatInput = document.createElement('input');
+                seatInput.type = 'number';
+                seatInput.name = `Items[${index}].SeatNumber`;
+
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.textContent = 'Remove';
+                removeBtn.onclick = () => row.remove();
+
+                row.appendChild(screeningInput);
+                row.appendChild(typeSelect);
+                row.appendChild(rowInput);
+                row.appendChild(seatInput);
+                row.appendChild(removeBtn);
+
+                index++;
+                return row;
+            }
+
+            addBtn.addEventListener('click', function () {
+                const screenId = screeningSelect.value;
+
+                if (!screenId) {
+                    alert("Select a screening first!");
+                    return;
+                }
+
+                const newRow = createRow(screenId);
+                container.appendChild(newRow);
             });
-        })();
 
-        // Row input
-        const rowInput = document.createElement('input');
-        rowInput.type = 'number';
-        rowInput.className = 'form-control';
-        rowInput.placeholder = 'Row';
-        rowInput.name = `Items[${index}].Row`;
-        rowInput.min = '1';
-        rowInput.style.width = '120px';
-
-        // Seat input
-        const seatInput = document.createElement('input');
-        seatInput.type = 'number';
-        seatInput.className = 'form-control';
-        seatInput.placeholder = 'Seat';
-        seatInput.name = `Items[${index}].SeatNumber`;
-        seatInput.min = '1';
-        seatInput.style.width = '120px';
-
-        // Remove button
-        const removeBtn = document.createElement('button');
-        removeBtn.type = 'button';
-        removeBtn.className = 'btn btn-outline-danger';
-        removeBtn.textContent = 'Remove';
-        removeBtn.addEventListener('click', function () {
-            container.removeChild(row);
         });
-
-        row.appendChild(screeningInput);
-        row.appendChild(typeSelect);
-        row.appendChild(rowInput);
-        row.appendChild(seatInput);
-        row.appendChild(removeBtn);
-
-        index++;
-        return row;
-    }
-
-    addBtn.addEventListener('click', function () {
-        const screeningId = screeningSelect.value;
-        if (!screeningId) {
-            alert('Select a screening first.');
-            screeningSelect.focus();
-            return;
-        }
-
-        const r = createRow(screeningId);
-        container.appendChild(r);
-    });
-
-    // When screening changes, update hidden screening inputs in existing rows
-    screeningSelect.addEventListener('change', function () {
-        const screenId = screeningSelect.value;
-        container.querySelectorAll('input[type="hidden"]').forEach(h => h.value = screenId);
-    });
-
-    // initial autofocus
-    screeningSelect.focus();
-})();
 </script>
 }

@@ -35,9 +35,10 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
 
         // Optional: if you still want to expose a TicketPurchase model for additional fields
         [BindProperty]
-        public TicketPurchase TicketPurchase { get; set; } = new();
+        public TicketPurchase ticketPurchase { get; set; } = new();
 
         public IList<DataContext.Entities.Screening> AvailableScreenings { get; set; } = Array.Empty<DataContext.Entities.Screening>();
+        public IList<Ticket> AvailableTickets { get; set; } = Array.Empty<Ticket>();
 
         public SelectList TicketTypeOptions { get; set; } = default!;
 
@@ -49,14 +50,18 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
                 .Take(50)
                 .ToListAsync();
 
+            Console.WriteLine($"Items count: {Items.Count}");
+
             TicketTypeOptions = new SelectList(Enum.GetValues<TicketType>().Select(t => new { Id = (int)t, Name = t.ToString() }), "Id", "Name");
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (Items == null || Items.Count == 0)
+            if (Items == null || !Items.Any())
             {
-                ModelState.AddModelError(string.Empty, "Add at least one ticket.");
+                ModelState.AddModelError(string.Empty, "No tickets added.");
+                await OnGetAsync();
+                return Page();
             }
 
             if (!ModelState.IsValid)
@@ -79,11 +84,15 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
             try
             {
                 // Build a set of screening/row/seat tuples to check
-                var screeningIds = Items.Select(i => i.ScreeningId).Distinct().ToArray();
-                var conflicts = await _context.Tickets
-                    .Where(t => screeningIds.Contains(t.ScreeningId) &&
-                                Items.Any(i => i.ScreeningId == t.ScreeningId && i.Row == t.Row && i.SeatNumber == t.SeatNumber))
-                    .ToListAsync();
+                var tickets = await _context.Tickets.ToListAsync();
+
+                var conflicts = tickets.Where(t =>
+                    Items.Any(i =>
+                        i.ScreeningId == t.ScreeningId &&
+                        i.Row == t.Row &&
+                        i.SeatNumber == t.SeatNumber
+                    )
+                );
 
                 if (conflicts.Any())
                 {
@@ -97,7 +106,7 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
                 var purchase = new TicketPurchase
                 {
                     PurchaseDateTime = DateTime.UtcNow,
-                    UserId = TicketPurchase.UserId // provided by cashier or 0; adjust to use authenticated user if desired
+                    UserId = ticketPurchase.UserId // provided by cashier or 0; adjust to use authenticated user if desired
                 };
                 _context.TicketPurchases.Add(purchase);
                 await _context.SaveChangesAsync();
@@ -118,7 +127,15 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
                     _context.Tickets.Add(ticket);
                 }
 
-                await _context.SaveChangesAsync();
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    var msg = ex.ToString();
+                    throw new Exception(msg);
+                }
                 await tx.CommitAsync();
 
                 return RedirectToPage("./Details", new { id = purchase.Id });
@@ -130,6 +147,18 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
                 await OnGetAsync();
                 return Page();
             }
+        }
+
+        public async Task<IActionResult> OnGetRefreshListAsync(int screenId)
+        {
+            // Szűrés a kapott azonosító alapján a DataContext segítségével
+            var filteredItems = await _context.Tickets
+                .Where(x => x.ScreeningId == screenId)
+                .AsNoTracking()
+                .ToListAsync();
+
+            // A szűrt listát adjuk át a Partial View-nak
+            return Page();
         }
 
         private decimal CalculatePrice(TicketType type)
