@@ -45,8 +45,11 @@ namespace JegyMester.Pages.Cashier
             // Load ticket + screening for business validation (time window)
             var ticket = await _context.Tickets
                 .Include(t => t.Screening)
+                .ThenInclude(t => t.Film)
+                .Include(t => t.TicketPurchase)
+                .ThenInclude(t => t.User)
                 .FirstOrDefaultAsync(t => t.Id == id);
-
+            
             if (ticket is null)
             {
                 StatusMessage = "Ticket not found.";
@@ -97,9 +100,11 @@ namespace JegyMester.Pages.Cashier
             if (int.TryParse(code, out var id))
             {
                 var ticket = await _context.Tickets
-                    .Include(t => t.Screening)
-                    .Include(t => t.TicketPurchase)
-                    .FirstOrDefaultAsync(t => t.Id == id);
+                .Include(t => t.Screening)
+                .ThenInclude(s => s.Film)
+                .Include(t => t.TicketPurchase)
+                .ThenInclude(t => t.User)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
                 if (ticket is null) return new JsonResult(new { ok = false, message = "Ticket not found" });
 
@@ -122,7 +127,12 @@ namespace JegyMester.Pages.Cashier
         public async Task<IActionResult> OnPostKeresAsync()
         {
             // Példa aszinkron adatbázis lekérdezésre
-            Ticket = await _context.Tickets.FirstOrDefaultAsync(x => x.Id == BevittSzam);
+            Ticket = await _context.Tickets
+                .Include(t => t.Screening)
+                .ThenInclude(p => p.Film)
+                .Include(t => t.TicketPurchase)
+                .ThenInclude(p => p.User)
+                .FirstOrDefaultAsync(x => x.Id == BevittSzam);
 
             if (Ticket is null)
                 Ticket = new Ticket { Id = 0, Price = 0, Row = 0, ScreeningId = 0, SeatNumber = 0, Screening = _context.Screenings.FirstOrDefault(), TicketPurchase = _context.TicketPurchases.FirstOrDefault(), TicketPurchaseId = 0, Type = DataContext.Enums.TicketType.Child, Valid = false };
