@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using JegyMester.DataContext.Context;
 using UserEntity = JegyMester.DataContext.Entities.User;
 using RoleEntity = JegyMester.DataContext.Entities.Role;
+using Microsoft.EntityFrameworkCore;
 
 namespace JegyMester.Pages.User
 {
@@ -32,20 +33,31 @@ namespace JegyMester.Pages.User
         public List<int> SelectedRoleIds { get; set; } = new();
 
         public List<RoleEntity> AllRoles { get; set; } = new();
+        public string ErrorMessage { get; set; }
 
         // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
             {
-                AllRoles = _context.Roles.ToList();
+                AllRoles = await _context.Roles.ToListAsync();
                 return Page();
             }
 
             if (SelectedRoleIds?.Any() ?? false)
             {
-                var roles = _context.Roles.Where(r => SelectedRoleIds.Contains(r.Id)).ToList();
+                var roles = await _context.Roles.Where(r => SelectedRoleIds.Contains(r.Id)).ToListAsync();
                 User.Roles = roles;
+            }
+
+            var existingUser = await _context.Users.AnyAsync(u => u.Email == User.Email);
+            if (existingUser)
+            {
+                ModelState.AddModelError("User.Email", "Ezzel az email címmel már létezik felhasználó.");
+
+                // Fontos: Itt is újra fel kell tölteni a listát a checkboxokhoz!
+                AllRoles = await _context.Roles.ToListAsync();
+                return Page();
             }
 
             _context.Users.Add(User);
