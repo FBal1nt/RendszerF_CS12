@@ -66,9 +66,22 @@ a {
 
     /* Szín, amikor az egér felette van */
     a:hover {
-        color: aqua; /* Sötétebb kék */
+        color: #0056b3; 
         text-decoration: underline; /* Aláhúzás megjelenítése */
     }
+
+.link-edit {
+    color: #4da6ff;
+}
+
+.link-details {
+    color: #5f6368;
+}
+
+.link-delete {
+    color: #ff5252;
+}
+
 
 h1, h2, h3, p {
     /* Paraméterek: vízszintes, függõleges, elmosódás mértéke, szín */

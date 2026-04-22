@@ -3,11 +3,26 @@
 
 <h3>Admin</h3>
 <hr />
-<div class="btn-group-vertical" role="group" aria-label="Admin navigation">
-    <a asp-page="/Cinema/Index" class="btn btn-primary">Cinema</a>
-    <a asp-page="/Film/Index" class="btn btn-primary">Film</a>
-    <a asp-page="/Role/Index" class="btn btn-primary">Role</a>
-    <a asp-page="/Room/Index" class="btn btn-primary">Room</a>
-    <a asp-page="/Screening/Index" class="btn btn-primary">Screening</a>
-    <a asp-page="/User/Index" class="btn btn-primary">User</a>
+
+<div class="container">
+    <div class="row g-3">
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+            <a asp-page="/Cinema/Index" class="btn btn-primary w-100 py-2" role="button" aria-label="Cinema">Cinema</a>
+        </div>
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+            <a asp-page="/Film/Index" class="btn btn-primary w-100 py-2" role="button" aria-label="Film">Film</a>
+        </div>
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+            <a asp-page="/Role/Index" class="btn btn-primary w-100 py-2" role="button" aria-label="Role">Role</a>
+        </div>
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+            <a asp-page="/Room/Index" class="btn btn-primary w-100 py-2" role="button" aria-label="Room">Room</a>
+        </div>
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+            <a asp-page="/Screening/Index" class="btn btn-primary w-100 py-2" role="button" aria-label="Screening">Screening</a>
+        </div>
+        <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+            <a asp-page="/User/Index" class="btn btn-primary w-100 py-2" role="button" aria-label="User">User</a>
+        </div>
+    </div>
 </div>
