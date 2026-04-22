@@ -38,7 +38,7 @@ else
                     Terem: @t.Screening.Room.Id<br />
                     Sor: @t.Row, Szék: @t.SeatNumber<br />
                     Típus: @t.Name<br />
-                    Ár: @t.Price Ft
+                    Ár: @t.Price Ft<br />
 
                     <form method="post" asp-page-handler="Delete" asp-route-ticketId="@t.Id" style="display:inline;">
                         <button type="submit" class="btn btn-danger btn-sm mt-2">Törlés</button>
