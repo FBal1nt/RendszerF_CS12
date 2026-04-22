@@ -17,13 +17,14 @@ namespace JegyMester.Pages.Tickets
 
         public IList<TicketPurchase> Purchases { get; set; } = new List<TicketPurchase>();
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
             // A bejelentkezett felhasználó ID-ja
             var userIdString = HttpContext.Session.GetString("UserId");
             if (userIdString == null)
-                return;
-
+            {
+                return RedirectToPage("/Login");
+            }
             int userId = int.Parse(userIdString);
 
             Purchases = await _context.TicketPurchases
@@ -35,6 +36,7 @@ namespace JegyMester.Pages.Tickets
                 .Where(tp => tp.UserId == userId)
                 .OrderByDescending(tp => tp.PurchaseDateTime)
                 .ToListAsync();
+            return Page();
         }
         public async Task<IActionResult> OnPostDeleteAsync(int ticketId)
         {

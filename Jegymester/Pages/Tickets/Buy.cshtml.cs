@@ -139,7 +139,16 @@ namespace JegyMester.Pages.Tickets
             await _context.SaveChangesAsync();
 
             TempData["Message"] = "Sikeres jegyvásárlás!";
-            return RedirectToPage("/Tickets/MyTickets");
+            if (userId != null)
+            {
+                // Bejelentkezett felhasználó → MyTickets
+                return RedirectToPage("/Tickets/MyTickets");
+            }
+            else
+            {
+                // Vendég → főoldal
+                return RedirectToPage("/Index");
+            }
         }
 
 
