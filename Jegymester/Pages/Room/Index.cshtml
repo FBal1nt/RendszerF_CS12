@@ -12,7 +12,13 @@
                 @Html.DisplayNameFor(model => model.Room[0].Cinema)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Room[0].Capacity)
+                @Html.DisplayNameFor(model => model.Room[0].RoomNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Room[0].RowCount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Room[0].SeatsPerRow)
             </th>
             <th></th>
         </tr>
@@ -24,7 +30,13 @@
                 @Html.DisplayFor(modelItem => item.Cinema.Name)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Capacity)
+                @Html.DisplayFor(modelItem => item.RoomNumber)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.RowCount)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.SeatsPerRow)
             </td>
             <td>
                 <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |

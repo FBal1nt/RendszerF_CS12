@@ -25,26 +25,13 @@ else
 
     <h4>Helyfoglalás</h4>
 
-    
-        int seatsPerRow = 10;
-        int totalSeats = Model.Screening.Room.Capacity;
-        int totalRows = (int)Math.Ceiling(totalSeats / (double)seatsPerRow);
-    
-
     <table class="table table-bordered text-center" style="max-width: 600px;">
-        @for (int r = 1; r <= totalRows; r++)
+        @for (int r = 1; r <= Model.Screening.Room.RowCount; r++)
         {
             <tr>
-                @for (int s = 1; s <= seatsPerRow; s++)
+                @for (int s = 1; s <= Model.Screening.Room.SeatsPerRow; s++)
                 {
-                    int seatNumber = (r - 1) * seatsPerRow + s;
-
-                    if (seatNumber > totalSeats)
-                    {
-                        <td></td>
-                        continue;
-                    }
-
+                    int seatNumber = (r - 1) * Model.Screening.Room.SeatsPerRow + s;
                     bool taken = Model.TakenSeats.Any(ts => ts.Row == r && ts.Seat == seatNumber);
 
                     <td style="padding: 6px;">
@@ -66,25 +53,13 @@ else
         }
     </table>
 
-    <script>
-        function selectSeat(row, seatNumber, column) {
-            document.getElementById("rowInput").value = row;
-            document.getElementById("columnInput").value = column;
-            document.getElementById("seatNumberHidden").value = seatNumber;
-
-            alert(`Kiválasztott hely: Sor ${row}, Oszlop ${column}`);
-        }
-    </script>
-
-    <form method="post">
+    <form method="post" id="buyForm" class="mt-4">
         <input type="hidden" asp-for="ScreeningId" />
-
-        <!-- A backendnek küldött seatNumber -->
         <input type="hidden" id="seatNumberHidden" name="SeatNumber" />
 
         <div class="mb-3">
             <label class="form-label">Jegytípus</label>
-            <select asp-for="SelectedType" class="form-select">
+            <select asp-for="SelectedType" class="form-select" id="ticketTypeSelect">
                 @foreach (var type in Enum.GetValues(typeof(JegyMester.DataContext.Enums.TicketType)))
                 {
                     <option value="@type">@type</option>
@@ -102,7 +77,7 @@ else
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Oszlop</label>
+            <label class="form-label">Szék</label>
             <input class="form-control" id="columnInput" readonly />
         </div>
 
@@ -119,6 +94,39 @@ else
             </div>
         }
 
-        <button type="submit" class="btn btn-success">Jegy megvásárlása</button>
+        <button type="submit" class="btn btn-success w-100">Jegy megvásárlása</button>
     </form>
+
+    <script>
+        // Az árakat tartalmazó objektum feltöltése C#-ból
+        const prices = {
+            @foreach (var type in Enum.GetValues(typeof(JegyMester.DataContext.Enums.TicketType)))
+            {
+                    <text>"@type": @Model.GetPrice((JegyMester.DataContext.Enums.TicketType)type),</text>
+            }
+        };
+
+        function selectSeat(row, seatNumber, column) {
+            document.getElementById("rowInput").value = row;
+            document.getElementById("columnInput").value = column;
+            document.getElementById("seatNumberHidden").value = seatNumber;
+        }
+
+        // Eseményfigyelő a típusváltáshoz
+        document.getElementById('ticketTypeSelect').addEventListener('change', function() {
+            const type = this.value;
+            const price = prices[type];
+            if (price !== undefined) {
+                document.getElementById('ticketPrice').innerText = price;
+            }
+        });
+
+        // Azonnali frissítés az oldal betöltésekor
+        window.onload = function() {
+            const initialType = document.getElementById('ticketTypeSelect').value;
+            if (prices[initialType]) {
+                document.getElementById('ticketPrice').innerText = prices[initialType];
+            }
+        };
+    </script>
 }

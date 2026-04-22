@@ -143,7 +143,7 @@ namespace JegyMester.Pages.Tickets
         }
 
 
-        private decimal GetPrice(TicketType type)
+        public decimal GetPrice(TicketType type)
         {
             return type switch
             {
