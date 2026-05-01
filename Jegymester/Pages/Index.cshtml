@@ -2,44 +2,46 @@
 @model IndexModel
 
 <div class="container mt-5">
-
     <div class="text-center mb-5">
         <h1 class="display-4 fw-bold">🎬 Üdv a JegyMesterben!</h1>
-        <p class="lead text-muted">Foglalj helyet a legjobb filmekre, gyorsan és egyszerűen.</p>
+        <p style="color:white">Foglalj helyet a legjobb filmekre, gyorsan és egyszerűen.</p>
     </div>
 
     <div class="row g-4">
-
+        <!-- Filmek -->
         <div class="col-md-4">
-            <div class="card shadow-sm h-100">
+            <div class="card h-100 menu-card">
                 <div class="card-body text-center">
-                    <h3 class="card-title">🎞 Filmek</h3>
+                    <h3 class="card-title">
+                        <a href="/FilmekLista" class="stretched-link text-decoration-none">🎞 Filmek</a>
+                    </h3>
                     <p class="card-text">Böngéssz a jelenleg futó filmek között.</p>
-                    <a href="/FilmekLista" class="btn btn-primary">Megnyitás</a>
                 </div>
             </div>
         </div>
 
+        <!-- Vetítések -->
         <div class="col-md-4">
-            <div class="card shadow-sm h-100">
+            <div class="card h-100 menu-card">
                 <div class="card-body text-center">
-                    <h3 class="card-title">🕒 Vetítések</h3>
+                    <h3 class="card-title">
+                        <a href="/VetitesekLista" class="stretched-link text-decoration-none">🕒 Vetítések</a>
+                    </h3>
                     <p class="card-text">Nézd meg a közelgő előadásokat.</p>
-                    <a href="/VetitesekLista" class="btn btn-primary">Megnyitás</a>
                 </div>
             </div>
         </div>
 
+        <!-- Jegyeim -->
         <div class="col-md-4">
-            <div class="card shadow-sm h-100">
+            <div class="card h-100 menu-card">
                 <div class="card-body text-center">
-                    <h3 class="card-title">🎫 Jegyeim</h3>
+                    <h3 class="card-title">
+                        <a href="/Tickets/MyTickets" class="stretched-link text-decoration-none">🎫 Jegyeim</a>
+                    </h3>
                     <p class="card-text">Korábbi vásárlásaid egy helyen.</p>
-                    <a href="/Tickets/MyTickets" class="btn btn-primary">Megnyitás</a>
                 </div>
             </div>
         </div>
-
     </div>
-
 </div>

@@ -11,5 +11,6 @@ namespace JegyMester.DataContext.Entities
         public string Director { get; set; } = string.Empty;
         public DateTime ReleaseDate { get; set; }
         public ICollection<Screening> Screenings { get; set; } = new List<Screening>();
+        public string? ImagePath { get; set; }
     }
 }

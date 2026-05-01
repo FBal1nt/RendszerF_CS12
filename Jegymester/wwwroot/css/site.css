@@ -1,193 +1,210 @@
+/* 1. Alapbeállítások */
 html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-.link_footer {
-    color: blue;
-}
-
-.link_footer:hover {
-    color: blueviolet;
-    text-decoration: underline;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
     margin-bottom: 60px;
-    color: white;
+    color: #ffffff;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    background-color: #000; /* Tartalék, ha a kép nem tölt be */
 }
 
+    /* 2. HÁTTÉRKÉP VISSZAÁLLÍTÁSA */
     body::before {
         content: "";
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
-        height: calc(100% - 60px);
-        z-index: -1; /* Hogy a tartalom mögött maradjon */
-
-        background-image: url('/images/view-3d-cinema-theatre-room.jpg');
+        height: 100%;
+        z-index: -1;
+        /* A gradiens segít, hogy a fehér szöveg ne vesszen el a világosabb részeken */
+        background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('/images/view-3d-cinema-theatre-room.jpg');
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
-        /* HALVÁNYÍTÁS: 0.0 (teljesen átlátszó) és 1.0 (eredeti) között */
-        opacity: 0.8;
+        opacity: 1; /* Biztosítjuk, hogy látszódjon */
     }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+/* 3. SZÖVEGEK OLVASHATÓSÁGA */
+/* A cím alatti alcím és a footer szövegek kényszerítése fehérre */
+.lead, .text-muted, footer, .navbar-nav .nav-link, footer a {
+    color: black !important;
+    text-shadow: none !important;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+/* 4. VETÍTÉSEK OLDAL - IDÕPONT GOMBOK */
+.screening-time-btn {
+    display: block;
+    background-color: rgba(0, 0, 0, 0.8); /* Sötét doboz a kép elõtt */
+    color: #19d0ff !important;
+    border: 2px solid #19d0ff;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    transition: all 0.3s ease;
+    text-decoration: none !important;
+    min-width: 130px;
 }
 
-/* Alapértelmezett link szín */
-a {
-    color: yellow; /* Kék szín */
-    text-decoration: none; /* Aláhúzás eltávolítása (opcionális) */
-    transition: 0.3s; /* Finom átmenet a színváltáskor */
-}
-
-    /* Szín, amikor az egér felette van */
-    a:hover {
-        color: #0056b3; 
-        text-decoration: underline; /* Aláhúzás megjelenítése */
+    .screening-time-btn:hover {
+        background-color: #19d0ff;
+        color: #000 !important;
+        transform: translateY(-3px);
     }
 
-.link-edit {
-    color: #4da6ff;
+    /* A gombokon belüli kis feliratok (pl. terem) */
+    .screening-time-btn .small {
+        color: #ffffff;
+        display: block;
+        margin-top: 4px;
+    }
+
+    .screening-time-btn:hover .small {
+        color: #333;
+    }
+
+/* 5. KÁRTYÁK JAVÍTÁSA (Fõoldali fehér dobozok) */
+.card {
+    background-color: #ffffff;
+    border: none;
 }
 
-.link-details {
-    color: #5f6368;
+/* A fehér kártyákon belül a szöveg legyen sötét */
+.card-body, .card-title, .card-text {
+    color: #212529 !important;
 }
 
-.link-delete {
-    color: #ff5252;
+/* 6. ÁRNYÉKOK TILTSÁSA */
+h1, h2, h3, h4, h5, h6, p, a {
+    text-shadow: none !important;
 }
 
-
-h1, h2, h3, p {
-    /* Paraméterek: vízszintes, függõleges, elmosódás mértéke, szín */
-    text-shadow: 2px 2px 4px #04fff7;
-}
-
-.main-menu {
-    display: flex; /* Bekapcsoljuk a Flexbox-ot */
-    justify-content: center; /* Vízszintes középre igazítás */
-    align-items: center; /* Függõleges középre igazítás */
-
-    min-height: 80vh;
+footer {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-top: 1px solid #000000;
+    padding: 15px 0;
+    position: absolute;
+    bottom: 0;
     width: 100%;
+    white-space: nowrap;
+    line-height: 20px; /* Alapértelmezett magasság */
+    z-index: 10; /* Hogy biztosan a háttérkép felett maradjon */
 }
 
-.cinema-btn {
-    display: inline-block;
-    padding: 12px 30px;
-    background-color: #1a1a1a; /* Mélysötét szürke/fekete */
-    color: #ffcc00; /* "Mozi-arany" szöveg */
-    border: 2px solid #ffcc00; /* Arany szegély */
-    border-radius: 50px; /* Lekerekített szélek */
-    text-transform: uppercase; /* Csupa nagybetû */
-    font-weight: bold;
-    letter-spacing: 2px; /* Szellõsebb betûk */
-    text-decoration: none;
-    transition: all 0.4s ease; /* Finom animáció mindenre */
-    box-shadow: 0 4px 15px rgba(255, 204, 0, 0.2); /* Enyhe arany ragyogás */
+    /* A footerben lévõ linkek és szövegek színe */
+    footer .container {
+        color: #ffffff !important;
+    }
+
+    footer a {
+        color: #19d0ff !important; /* A Privacy link legyen arany */
+        font-weight: bold;
+    }
+
+        footer a:hover {
+            color: #ffffff !important;
+            text-decoration: underline;
+        }
+
+/* Fõoldali menü kártyák egyedi stílusa */
+.menu-card {
+    transition: all 0.3s ease;
     cursor: pointer;
-    margin: 10px;
-    font-size: 1.1em; /* Kicsit nagyobb ikon az extra hatásért */
+    border: 2px solid transparent; /* Keret lefoglalása, hogy ne ugorjon hoverkor */
 }
 
-    /* Effekt, amikor az egér fölé ér */
-    .cinema-btn:hover {
-        background-color: #ffcc00; /* Megcseréljük a színeket */
-        color: #1a1a1a;
-        box-shadow: 0 0 25px rgba(255, 204, 0, 0.7); /* Erõsebb neon ragyogás */
-        transform: scale(1.05); /* Kicsit "kiugrik" a gomb */
-        margin: 10px; 
-        font-size: 1.3em; /* Kicsit nagyobb ikon az extra hatásért */
+    /* Hover állapot: kék háttér és fehér szövegek */
+    .menu-card:hover {
+        background-color: #19d0ff !important;
+        transform: translateY(-5px);
     }
 
-.cinema-table {
-    width: 100%;
-    border-collapse: collapse; /* A szegélyek egybeolvadnak */
-    background-color: #1a1a1a; /* Sötétszürke háttér */
-    color: white;
-    font-family: 'Segoe UI', sans-serif;
-    border: 2px solid #ffcc00; /* Arany keret az egész táblázatnak */
-    box-shadow: 0 0 20px rgba(255, 204, 0, 0.1); /* Enyhe külsõ ragyogás */
-    margin: 20px 0;
-}
+        /* Hover esetén a cím és a leírás is legyen fehér/fekete az olvashatóságért */
+        .menu-card:hover .card-title a,
+        .menu-card:hover .card-text {
+            color: #000 !important;
+        }
 
-    /* Fejléc stílusa */
-    .cinema-table th {
-        background-color: #333;
-        color: #ffcc00; /* Arany szöveg a fejlécben */
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        padding: 15px;
-        border-bottom: 2px solid #ffcc00;
-        text-align: left;
+    /* Alaphelyzetben a link színe maradjon a kártya szövegének színe */
+    .menu-card .card-title a {
+        color: #212529;
     }
 
-    /* Cellák stílusa */
-    .cinema-table td {
-        padding: 12px 15px;
-        border-bottom: 1px solid #333;
-    }
-
-    /* Zebra csíkozás (opcionális, de segíti az olvasást) */
-    .cinema-table tr:nth-child(even) {
-        background-color: #222;
-    }
-
-    /* Sor kiemelése, ha az egér felette van */
-    .cinema-table tr:hover {
-        background-color: rgba(255, 204, 0, 0.1); /* Halvány arany háttér */
-        transition: background-color 0.3s ease;
-    }
-
-.cinema-btn-danger {
-    display: inline-block;
-    padding: 12px 30px;
-    background-color: crimson;
-    color: #ffcc00; /* "Mozi-arany" szöveg */
-    border: 2px solid #ffcc00; /* Arany szegély */
-    border-radius: 50px; /* Lekerekített szélek */
-    text-transform: uppercase; /* Csupa nagybetû */
-    font-weight: bold;
-    letter-spacing: 2px; /* Szellõsebb betûk */
-    text-decoration: none;
-    transition: all 0.4s ease; /* Finom animáció mindenre */
-    box-shadow: 0 4px 15px rgba(255, 204, 0, 0.2); /* Enyhe arany ragyogás */
+/* Film kártya alapstílus */
+.film-card {
+    transition: all 0.3s ease;
     cursor: pointer;
-    margin: 10px;
-    font-size: 1.1em; /* Kicsit nagyobb ikon az extra hatásért */
+    background-color: transparent; /* Hogy ne zavarjon be a gyári fehér */
 }
 
-    /* Effekt, amikor az egér fölé ér */
-    .cinema-btn-danger:hover {
-        background-color: #ffcc00; /* Megcseréljük a színeket */
-        color: crimson;
-        box-shadow: 0 0 25px rgba(255, 204, 0, 0.7); /* Erõsebb neon ragyogás */
-        transform: scale(1.05); /* Kicsit "kiugrik" a gomb */
-        margin: 10px;
-        font-size: 1.3em; /* Kicsit nagyobb ikon az extra hatásért */
+    /* Hover: a kártya megemelkedik */
+    .film-card:hover {
+        transform: translateY(-10px);
+    }
+
+        /* Hover: a fehér alsó rész kék lesz */
+        .film-card:hover .card-body {
+            background-color: #19d0ff !important;
+        }
+
+        /* Hover: a szövegek feketék maradnak/lesznek a kék háttéren */
+        .film-card:hover .card-title a,
+        .film-card:hover .card-text {
+            color: #000000 !important;
+        }
+
+    /* Opcionális: a kép sarka maradjon szögletes, ha a body lekerekített */
+    .film-card .card-img-top {
+        border-radius: 10px 10px 0 0;
+    }
+
+/* Navigációs gombok hover effektje */
+.navbar-nav .nav-item {
+    margin: 0 5px; /* Legyen egy kis hely a gombok között */
+}
+
+.navbar-nav .nav-link {
+    padding: 8px 15px !important; /* Nagyobb kattintható felület */
+    border-radius: 20px; /* Szép lekerekített forma */
+    transition: all 0.3s ease;
+    color: #212529 !important; /* Alapértelmezett sötét szöveg a fehér sávon */
+    font-weight: 500;
+}
+
+    /* Hover állapot a menüben */
+    .navbar-nav .nav-link:hover {
+        background-color: #19d0ff !important; /* A kért kék szín */
+        color: #000000 !important; /* Fekete szöveg a kék háttéren */
+    }
+
+    /* Az éppen aktív oldal linkje is kaphat egy enyhe jelzést */
+    .navbar-nav .nav-link.active {
+        background-color: rgba(25, 208, 255, 0.1);
+    }
+
+/* Szûrõ sávon belüli beviteli mezõk finomítása */
+.card.bg-white .form-select,
+.card.bg-white .form-control {
+    border-radius: 10px;
+    border: 1px solid #dee2e6 !important; /* Világosszürke keret */
+}
+
+    /* Fókusz állapot: ha belekattintanak, kapjon egy kis kék keretet */
+    .card.bg-white .form-select:focus,
+    .card.bg-white .form-control:focus {
+        border-color: #19d0ff !important;
+        box-shadow: 0 0 0 0.25rem rgba(25, 208, 255, 0.25);
+    }
+
+/* Vissza gomb stílusa a kék sávban */
+.btn-dark.rounded-pill {
+    transition: all 0.3s ease;
+}
+
+    .btn-dark.rounded-pill:hover {
+        background-color: #000;
+        transform: scale(1.05);
     }

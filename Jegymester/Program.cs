@@ -15,7 +15,7 @@ namespace JegyMester
             builder.Services.AddSession();
             builder.Services.AddHttpContextAccessor();
 
-            // Ez majd ha meglesz az adatbázis akkor kell
+            // Database link
             builder.Services.AddDbContext<JegyMesterDbContext>(options => options.UseSqlServer("Server=(local)\\SQLEXPRESS;Database=JegyMesterDB;Trusted_Connection=True;TrustServerCertificate=True;"));
             //builder.Services.AddDbContext<JegyMesterDbContext>(options => options.UseSqlServer("Server=(local);Database=JegyMesterDB;Trusted_Connection=True;TrustServerCertificate=True;"));
 
