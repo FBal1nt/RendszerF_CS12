@@ -1,24 +1,45 @@
 @page
 @model JegyMester.Pages.FilmekListaModel
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment HostEnvironment
 
-<h3>FILMEK</h3>
-<hr />
+<h3 class="mb-4 text-white">FILMEK</h3>
 
 @if (Model.Filmek?.Any() != true)
 {
-    <p>Nincsenek filmek a listában.</p>
+    <div class="alert alert-info">Nincsenek filmek a listában.</div>
 }
 else
 {
-    <ul class="list-group">
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4 mb-5">
         @foreach (var film in Model.Filmek)
         {
-            <li class="list-group-item">
-                <div class="fw-bold">@film.Title</div>
-                <div class="text-muted small">
-                    Műfaj: @film.Genre; Hossz: @film.DurationInMinutes perc; Rendező: @film.Director; Megjelenés: @film.ReleaseDate.ToString("yyyy.MM.dd.")
+            <div class="col">
+                <div class="card h-100 border-0 shadow-sm film-card">
+
+                    <!-- poster -->
+                    @if (!string.IsNullOrEmpty(film.ImagePath) && System.IO.File.Exists(System.IO.Path.Combine(HostEnvironment.WebRootPath, film.ImagePath.TrimStart('/'))))
+                    {
+                        <img src="@film.ImagePath" class="card-img-top" alt="@film.Title plakátja" style="aspect-ratio: 2/3; object-fit: cover;">
+                    }
+                    else
+                    {
+                        <img src="/images/films/no_poster.webp" class="card-img-top" alt="Nincs elérhető kép" style="aspect-ratio: 2/3; object-fit: cover; background-color: #ddd;">
+                    }
+
+                    <!-- A body és a footer most egy közös fehér terület -->
+                    <div class="card-body text-center d-flex flex-column justify-content-center bg-white rounded-bottom">
+                        <h5 class="card-title fw-bold mb-1">
+                            <a href="/Screening/ScreeningListByFilm/@film.Id" class="text-decoration-none text-dark stretched-link">
+                                @film.Title
+                            </a>
+                        </h5>
+                        <p class="card-text text-muted small mb-0">
+                            @film.DurationInMinutes perc • @film.Genre
+                        </p>
+                    </div>
+
                 </div>
-            </li>
+            </div>
         }
-    </ul>
+    </div>
 }

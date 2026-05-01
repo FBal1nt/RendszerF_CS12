@@ -1,0 +1,93 @@
+﻿@page "{movieId:int}"
+@model JegyMester.Pages.ScreeningListByFilmModel
+@inject Microsoft.AspNetCore.Hosting.IWebHostEnvironment HostEnvironment
+
+<div class="container py-4">
+    <!-- FILM INFÓ SZEKCIÓ -->
+    <div class="row mb-5 align-items-center bg-dark text-white p-4 rounded shadow">
+        <div class="col-md-3 text-center">
+            @{
+                var imgUrl = "/images/films/no-poster.webp";
+                if (!string.IsNullOrEmpty(Model.Film.ImagePath))
+                {
+                    var fullPath = System.IO.Path.Combine(HostEnvironment.WebRootPath, Model.Film.ImagePath.TrimStart('/'));
+                    if (System.IO.File.Exists(fullPath)) { imgUrl = Model.Film.ImagePath; }
+                }
+            }
+            <img src="@imgUrl" class="img-fluid rounded shadow-sm" style="max-height: 350px;" alt="Plakát">
+        </div>
+        <div class="col-md-9 mt-3 mt-md-0">
+            <h1 class="display-4 fw-bold">@Model.Film.Title</h1>
+            <p style="color:white">@Model.Film.Genre | @Model.Film.DurationInMinutes perc</p>
+            <hr class="border-secondary" />
+            <p><strong>Rendező:</strong> @Model.Film.Director</p>
+            <p><strong>Bemutató:</strong> @Model.Film.ReleaseDate.ToString("yyyy. MMMM dd.")</p>
+        </div>
+    </div>
+
+    <!-- KÉK SZŰRŐ SÁV DÁTUMMAL -->
+    <div class="card mb-4 border-0 shadow-sm bg-white">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-center">
+                <div class="col-auto">
+                    <label class="fw-bold text-dark"><i class="bi bi-funnel"></i> Szűrés:</label>
+                </div>
+
+                <!-- Mozi szűrő -->
+                <div class="col-md-3">
+                    <select asp-for="SelectedCinemaId" class="form-select border-0" onchange="this.form.submit()">
+                        <option value="">-- Összes mozi --</option>
+                        @foreach (var cinema in Model.Cinemas)
+                        {
+                            <option value="@cinema.Id">@cinema.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Dátum szűrő -->
+                <div class="col-md-3">
+                    <input type="date" asp-for="SelectedDate" class="form-control border-0" onchange="this.form.submit()" />
+                </div>
+
+                <div class="col-auto ms-auto">
+                    <a asp-page="/FilmekLista" class="btn btn-dark btn-sm rounded-pill px-3">Vissza a filmekhez</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- VETÍTÉSEK CSOPORTOSÍTVA -->
+    @if (!Model.Screenings.Any())
+    {
+        <div class="alert alert-warning text-center py-5 shadow-sm">
+            <h4>Nincs elérhető vetítés</h4>
+            <p class="mb-0">Sajnos a megadott feltételekkel nem találtunk jövőbeli időpontot.</p>
+        </div>
+    }
+    else
+    {
+        var groupedByCinema = Model.Screenings.GroupBy(s => s.Room.Cinema.Name);
+
+        @foreach (var cinemaGroup in groupedByCinema)
+        {
+            <div class="mb-5">
+                <h3 class="border-bottom pb-2 mb-3 text-white">
+                    <i class="bi bi-building"></i> @cinemaGroup.Key
+                </h3>
+
+                <div class="row row-cols-auto g-3">
+                    @foreach (var screening in cinemaGroup)
+                    {
+                        <div class="col">
+                            <a href="/Tickets/Buy/@screening.Id" class="screening-time-btn">
+                                <div class="fw-bold fs-4">@screening.StartTime.ToString("HH:mm")</div>
+                                <div class="small">@screening.StartTime.ToString("MMM dd.")</div>
+                                <div class="small fw-bold border-top pt-1 mt-1">@screening.Room.RoomNumber. terem</div>
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>
