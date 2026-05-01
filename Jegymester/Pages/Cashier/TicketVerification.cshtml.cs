@@ -10,7 +10,7 @@ using JegyMester.DataContext.Entities;
 
 namespace JegyMester.Pages.Cashier
 {
-    [Authorize(Roles = "Cashier")]   // 🔥 Kötelező backend védelem
+    [Authorize(Roles = "Cashier")]
     public class VerificationModel : PageModel
     {
         private readonly JegyMesterDbContext _context;
@@ -27,38 +27,33 @@ namespace JegyMester.Pages.Cashier
         [TempData]
         public string? StatusMessage { get; set; }
 
-        [BindProperty]
-        public int BevittSzam { get; set; }
-
         public async Task<IActionResult> OnGetAsync()
         {
-            // Üres placeholder ticket, hogy a Razor ne dobjon null reference hibát
-            Ticket = new Ticket
+            if (!User.IsInRole("Cashier"))
             {
-                Id = 0,
-                Price = 0,
-                Row = 0,
-                SeatNumber = 0,
-                ScreeningId = 0,
-                Screening = await _context.Screenings.FirstOrDefaultAsync(),
-                TicketPurchase = await _context.TicketPurchases.FirstOrDefaultAsync(),
-                TicketPurchaseId = 0,
-                Type = DataContext.Enums.TicketType.Child,
-                Valid = false
-            };
+                return Forbid();
+            }
 
             return Page();
         }
-
-        // Jegy érvényesítése (használatba vétel)
+        
+        // Atomic verify + mark-used using conditional UPDATE
         public async Task<IActionResult> OnPostVerifyAsync(int? id)
         {
+            if (!User.IsInRole("Cashier"))
+            {
+                return Forbid();
+            }
             if (id == null) return NotFound();
 
+            // Load ticket + screening for business validation (time window)
             var ticket = await _context.Tickets
                 .Include(t => t.Screening)
+                .ThenInclude(t => t.Film)
+                .Include(t => t.TicketPurchase)
+                .ThenInclude(t => t.User)
                 .FirstOrDefaultAsync(t => t.Id == id);
-
+            
             if (ticket is null)
             {
                 StatusMessage = "Ticket not found.";
@@ -73,22 +68,22 @@ namespace JegyMester.Pages.Cashier
 
             if (ticket.Screening is not null)
             {
-                var now = DateTime.Now;
-
-                if (now < ticket.Screening.StartTime.AddMinutes(-10) ||
-                    now > ticket.Screening.EndTime.AddMinutes(15))
+                var now = DateTime.UtcNow;
+                // Adjust allowed window if needed (e.g., allow 10 minutes before start)
+                if (now < ticket.Screening.StartTime.AddMinutes(-10) || now > ticket.Screening.EndTime.AddMinutes(15))
                 {
                     StatusMessage = "Ticket is not valid for this screening time.";
                     return RedirectToPage(new { id = ticket.Id });
                 }
             }
 
-            // Atomic update
+            // Final atomic update: mark as used only if still valid
             var rows = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"UPDATE Tickets SET Valid = 0 WHERE Id = {ticket.Id} AND Valid = 1");
 
             if (rows == 0)
             {
+                // Another process already used it (race) or no state change was possible
                 _logger.LogWarning("Concurrent verification or already used ticket {TicketId} by {User}", ticket.Id, User?.Identity?.Name);
                 StatusMessage = "Ticket could not be verified (already used or concurrent attempt).";
                 return RedirectToPage(new { id = ticket.Id });
@@ -99,21 +94,23 @@ namespace JegyMester.Pages.Cashier
             return RedirectToPage(new { id = ticket.Id });
         }
 
-        // AJAX jegykeresés (QR / ID alapján)
+        // AJAX endpoint to lookup ticket by scanned code or id
+        // Expects form field "code" (barcode or numeric id)
         public async Task<JsonResult> OnPostScanAsync([FromForm] string code)
         {
-            if (string.IsNullOrWhiteSpace(code))
-                return new JsonResult(new { ok = false, message = "Empty code" });
+            if (string.IsNullOrWhiteSpace(code)) return new JsonResult(new { ok = false, message = "Empty code" });
 
+            // Try parse numeric id first
             if (int.TryParse(code, out var id))
             {
                 var ticket = await _context.Tickets
-                    .Include(t => t.Screening)
-                    .Include(t => t.TicketPurchase)
-                    .FirstOrDefaultAsync(t => t.Id == id);
+                .Include(t => t.Screening)
+                .ThenInclude(s => s.Film)
+                .Include(t => t.TicketPurchase)
+                .ThenInclude(t => t.User)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
-                if (ticket is null)
-                    return new JsonResult(new { ok = false, message = "Ticket not found" });
+                if (ticket is null) return new JsonResult(new { ok = false, message = "Ticket not found" });
 
                 return new JsonResult(new
                 {
@@ -128,34 +125,55 @@ namespace JegyMester.Pages.Cashier
                 });
             }
 
+            // If using barcode strings, replace above logic to search by barcode column.
             return new JsonResult(new { ok = false, message = "Unsupported code format" });
         }
 
-        public async Task<IActionResult> OnPostKeresAsync()
+        public async Task<JsonResult> OnPostScanAndVerifyAsync([FromForm] string code)
         {
-            Ticket = await _context.Tickets
-                .Include(t => t.Screening)
-                .Include(t => t.TicketPurchase)
-                .FirstOrDefaultAsync(x => x.Id == BevittSzam);
+            if (string.IsNullOrWhiteSpace(code))
+                return new JsonResult(new { ok = false, message = "Empty code" });
 
-            if (Ticket is null)
+            if (!int.TryParse(code, out var id))
+                return new JsonResult(new { ok = false, message = "Invalid format" });
+
+            var ticket = await _context.Tickets
+                .Include(t => t.Screening)
+                .ThenInclude(s => s.Film)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (ticket == null)
+                return new JsonResult(new { ok = false, message = "Ticket not found" });
+
+            if (!ticket.Valid)
+                return new JsonResult(new { ok = false, message = "Already used" });
+
+            var now = DateTime.UtcNow;
+
+            bool ignoreTime = true; // EZT FALSE HA NEM DEBUG MÓDBAN VAGY!!!!!!!!!
+
+            if (!ignoreTime && ticket.Screening != null &&
+               (now < ticket.Screening.StartTime.AddMinutes(-10) ||
+                now > ticket.Screening.EndTime.AddMinutes(15)))
             {
-                Ticket = new Ticket
-                {
-                    Id = 0,
-                    Price = 0,
-                    Row = 0,
-                    SeatNumber = 0,
-                    ScreeningId = 0,
-                    Screening = await _context.Screenings.FirstOrDefaultAsync(),
-                    TicketPurchase = await _context.TicketPurchases.FirstOrDefaultAsync(),
-                    TicketPurchaseId = 0,
-                    Type = DataContext.Enums.TicketType.Child,
-                    Valid = false
-                };
+                return new JsonResult(new { ok = false, message = "Too early or too late for this screening" });
             }
 
-            return Page();
+            var rows = await _context.Database.ExecuteSqlInterpolatedAsync(
+                $"UPDATE Tickets SET Valid = 0 WHERE Id = {ticket.Id} AND Valid = 1");
+
+            if (rows == 0)
+                return new JsonResult(new { ok = false, message = "Already used (race)" });
+
+            return new JsonResult(new
+            {
+                ok = true,
+                message = "Ticket verified",
+                ticketId = ticket.Id,
+                row = ticket.Row,
+                seat = ticket.SeatNumber,
+                type = ticket.Type.ToString()
+            });
         }
     }
 }

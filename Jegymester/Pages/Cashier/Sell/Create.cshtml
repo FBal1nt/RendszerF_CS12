@@ -12,7 +12,6 @@
 
 <form method="post" id="sellForm">
     @Html.AntiForgeryToken()
-
     <div class="mb-3">
         <label class="form-label">Screening</label>
         <select id="screeningSelect" class="form-select">
@@ -24,116 +23,151 @@
         </select>
     </div>
 
-    <button type="button" id="addRowBtn" class="btn btn-success mb-3">Add Ticket</button>
+    <div id="seatGrid" class="mt-4"></div>
+    <div id="hiddenInputs"></div>
+    <div id="selectedInfo" class="mt-3"></div>
 
-    <div id="rowsContainer" class="mb-3"></div>
-
-    <div class="mb-3">
-        <label>User Id (cashier or guest)</label>
-        <input asp-for="TicketPurchase.UserId" class="form-control" />
-    </div>
 
     <div class="mb-3">
         <input type="submit" value="Complete Sale" class="btn btn-primary" />
         <a asp-page="./Index" class="btn btn-secondary">Cancel</a>
     </div>
 </form>
-
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function () {
 
-            const container = document.getElementById('rowsContainer');
-            const screeningSelect = document.getElementById('screeningSelect');
-            const addBtn = document.getElementById('addRowBtn');
+            const screeningSelect = document.getElementById("screeningSelect");
+            const seatGrid = document.getElementById("seatGrid");
+            const hiddenInputs = document.getElementById("hiddenInputs");
+            const selectedInfo = document.getElementById("selectedInfo");
+            const form = document.getElementById("sellForm");
 
-            let index = 0;
+            let selectedSeats = [];
 
-            function createRow() {
-                const row = document.createElement('div');
-                row.className = 'd-flex gap-2 align-items-end mb-2';
+            screeningSelect.addEventListener("change", loadSeats);
 
-                const screeningInput = document.createElement('input');
-                screeningInput.type = 'hidden';
-                screeningInput.name = `Items[${index}].ScreeningId`;
-                screeningInput.value = screeningSelect.value;
+            function loadSeats() {
+                const screeningId = screeningSelect.value;
+                if (!screeningId) return;
 
-                const typeSelect = document.createElement('select');
-                typeSelect.className = 'form-select';
-                typeSelect.name = `Items[${index}].Type`;
+                fetch(`?handler=TakenSeats&screeningId=${screeningId}`)
+                    .then(res => res.json())
+                    .then(taken => renderGrid(taken));
+            }
 
-                const types = @Html.Raw(Json.Serialize(Enum.GetNames(typeof(TicketType))));
+            function renderGrid(takenSeats) {
+                seatGrid.innerHTML = "";
+                selectedSeats = [];
 
-                types.forEach((t, i) => {
-                    const opt = document.createElement('option');
-                    opt.value = i;
-                    opt.textContent = t;
-                    typeSelect.appendChild(opt);
+                const rows = 10;
+                const seatsPerRow = 12;
+
+                for (let r = 1; r <= rows; r++) {
+                    const rowDiv = document.createElement("div");
+
+                    const label = document.createElement("span");
+                    label.className = "row-label";
+                    label.textContent = r + ". sor";
+                    rowDiv.appendChild(label);
+
+                    for (let s = 1; s <= seatsPerRow; s++) {
+                        const seat = document.createElement("div");
+                        seat.className = "seat";
+
+                        const isTaken = takenSeats.some(t => t.row === r && t.seatNumber === s);
+
+                        if (isTaken) {
+                            seat.classList.add("taken");
+                        } else {
+                            seat.classList.add("free");
+                            seat.onclick = () => toggleSeat(seat, r, s);
+                        }
+
+                        seat.textContent = s;
+                        rowDiv.appendChild(seat);
+                    }
+
+                    seatGrid.appendChild(rowDiv);
+                }
+            }
+
+            function toggleSeat(element, row, seatNumber) {
+                const index = selectedSeats.findIndex(s => s.row === row && s.seatNumber === seatNumber);
+
+                if (index >= 0) {
+                    selectedSeats.splice(index, 1);
+                    element.classList.remove("selected");
+                    element.classList.add("free");
+                } else {
+                    selectedSeats.push({ row, seatNumber });
+                    element.classList.remove("free");
+                    element.classList.add("selected");
+                }
+
+                syncForm();
+            }
+
+            function syncForm() {
+                hiddenInputs.innerHTML = "";
+
+                let text = "Selected: ";
+
+                selectedSeats.forEach((seat, i) => {
+                    hiddenInputs.innerHTML += `
+                        <input type="hidden" name="Items[${i}].ScreeningId" value="${screeningSelect.value}" />
+                        <input type="hidden" name="Items[${i}].Row" value="${seat.row}" />
+                        <input type="hidden" name="Items[${i}].SeatNumber" value="${seat.seatNumber}" />
+                        <input type="hidden" name="Items[${i}].Type" value="0" />
+                    `;
+
+                    text += `${seat.row}. sor ${seat.seatNumber}. szék, `;
                 });
 
-                const rowInput = document.createElement('input');
-                rowInput.type = 'number';
-                rowInput.name = `Items[${index}].Row`;
-                rowInput.className = 'form-control';
-                rowInput.required = true;
-
-                const seatInput = document.createElement('input');
-                seatInput.type = 'number';
-                seatInput.name = `Items[${index}].SeatNumber`;
-                seatInput.className = 'form-control';
-                seatInput.required = true;
-
-                const removeBtn = document.createElement('button');
-                removeBtn.type = 'button';
-                removeBtn.textContent = 'Remove';
-                removeBtn.className = 'btn btn-danger';
-
-                removeBtn.onclick = () => {
-                    row.remove();
-                    reindex();
-                };
-
-                row.appendChild(screeningInput);
-                row.appendChild(typeSelect);
-                row.appendChild(rowInput);
-                row.appendChild(seatInput);
-                row.appendChild(removeBtn);
-
-                index++;
-                return row;
+                selectedInfo.textContent = selectedSeats.length ? text : "";
             }
 
-            addBtn.addEventListener('click', function () {
-                if (!screeningSelect.value) {
-                    alert("Select a screening first!");
-                    return;
-                }
-
-                const newRow = createRow();
-                container.appendChild(newRow);
-            });
-
-            document.getElementById("sellForm").addEventListener("submit", function (e) {
-                if (container.children.length === 0) {
+            form.addEventListener("submit", function (e) {
+                if (selectedSeats.length === 0) {
                     e.preventDefault();
-                    alert("Add at least one ticket!");
+                    alert("Select at least one seat!");
                 }
             });
-
-            function reindex() {
-                const rows = container.children;
-                for (let i = 0; i < rows.length; i++) {
-                    rows[i].querySelectorAll("input, select").forEach(el => {
-                        el.name = el.name.replace(/Items
-
-        \[\d+\]
-
-        /, `Items[${i}]`);
-                    });
-                }
-                index = rows.length;
-            }
 
         });
     </script>
 }
+<style>
+    .seat {
+        width: 35px;
+        height: 35px;
+        margin: 4px;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    .free {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .taken {
+        background-color: #dc3545;
+        color: white;
+        cursor: not-allowed;
+    }
+
+    .selected {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .row-label {
+        width: 60px;
+        display: inline-block;
+    }
+</style>
