@@ -36,7 +36,7 @@ namespace JegyMester
                             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
                     };
 
-                    // Token beolvasása cookie-ból
+                    // Token beolvas�sa cookie-b�l
                     options.Events = new JwtBearerEvents
                     {
                         OnMessageReceived = context =>

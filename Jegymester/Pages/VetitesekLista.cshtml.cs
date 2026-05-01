@@ -28,6 +28,7 @@ namespace JegyMester.Pages
                 .Include(s => s.Film)
                 .Include(s => s.Room)
                     .ThenInclude(r => r.Cinema)
+                .Where(s => s.StartTime > DateTime.Now) // Csak a jövőbeli vetítések
                 .ToListAsync();
         }
 
