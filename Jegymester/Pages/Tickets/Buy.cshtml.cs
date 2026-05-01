@@ -1,9 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using JegyMester.DataContext.Context;
 using JegyMester.DataContext.Entities;
 using JegyMester.DataContext.Enums;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace JegyMester.Pages.Tickets
 {
@@ -185,8 +186,9 @@ namespace JegyMester.Pages.Tickets
                 });
 
             // 2. Felhasználó / Vendég kezelése
-            var userIdString = HttpContext.Session.GetString("UserId");
-            int? userId = userIdString != null ? int.Parse(userIdString) : null;
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            int? userId = userIdClaim != null ? int.Parse(userIdClaim.Value) : null;
+
 
             if (userId == null)
             {

@@ -1,6 +1,7 @@
 ﻿using JegyMester.DataContext.Context;
 using JegyMester.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -13,51 +14,52 @@ namespace JegyMester
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Razor Pages
             builder.Services.AddRazorPages();
 
-            // DbContext
             builder.Services.AddDbContext<JegyMesterDbContext>(options =>
                 options.UseSqlServer("Server=(local)\\SQLEXPRESS;Database=JegyMesterDB;Trusted_Connection=True;TrustServerCertificate=True;"));
 
-            // JWT Authentication
-            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+            // 🔥 COOKIE + JWT hibrid authentikáció
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            })
+            .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                        ValidAudience = builder.Configuration["Jwt:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-                    };
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                    ValidAudience = builder.Configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+                };
 
-                    // Token beolvas�sa cookie-b�l
-                    options.Events = new JwtBearerEvents
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
                     {
-                        OnMessageReceived = context =>
+                        if (context.Request.Cookies.ContainsKey("auth_token"))
                         {
-                            if (context.Request.Cookies.ContainsKey("auth_token"))
-                            {
-                                context.Token = context.Request.Cookies["auth_token"];
-                            }
-                            return Task.CompletedTask;
+                            context.Token = context.Request.Cookies["auth_token"];
                         }
-                    };
-                });
+                        return Task.CompletedTask;
+                    }
+                };
+            });
 
             builder.Services.AddAuthorization();
 
-            // AuthService
             builder.Services.AddScoped<AuthService>();
 
             var app = builder.Build();
 
-            // Pipeline
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Error");

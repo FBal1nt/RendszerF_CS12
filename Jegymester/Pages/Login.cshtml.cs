@@ -1,11 +1,13 @@
 ﻿using JegyMester.DataContext.Context;
 using JegyMester.DataContext.Entities;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 public class LoginModel : PageModel
@@ -35,17 +37,14 @@ public class LoginModel : PageModel
             return Page();
         }
 
-        // BCrypt jelszó ellenőrzés
         if (!BCrypt.Net.BCrypt.Verify(Password, user.PasswordHash))
         {
             ErrorMessage = "Hibás email vagy jelszó.";
             return Page();
         }
 
-        // JWT token generálása
         var token = GenerateJwtToken(user);
 
-        // Token cookie-ba tétele
         HttpContext.Response.Cookies.Append("auth_token", token, new CookieOptions
         {
             HttpOnly = true,
@@ -53,6 +52,23 @@ public class LoginModel : PageModel
             SameSite = SameSiteMode.Strict,
             Expires = DateTimeOffset.UtcNow.AddHours(3)
         });
+
+        // Cookie-ba is több szerep
+        var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.Email)
+        };
+
+        foreach (var role in user.Roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role.Name));
+        }
+
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme))
+        );
 
         return RedirectToPage("/Index");
     }
@@ -64,15 +80,16 @@ public class LoginModel : PageModel
 
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        // 🔥 Biztonságos szerepkör lekérés
-        var roleName = user.Roles.FirstOrDefault()?.Name ?? "User";
-
-        var claims = new[]
+        var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, roleName)
+            new Claim(ClaimTypes.Email, user.Email)
         };
+
+        foreach (var role in user.Roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role.Name));
+        }
 
         var token = new JwtSecurityToken(
             issuer: _config["Jwt:Issuer"],
