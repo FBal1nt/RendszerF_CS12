@@ -1,4 +1,4 @@
-﻿@page "{id:int}"
+﻿@* @page "{id:int}"
 @model JegyMester.Pages.Tickets.BuyModel
 
 <h2>Jegyvásárlás</h2>
@@ -128,5 +128,216 @@ else
                 document.getElementById('ticketPrice').innerText = prices[initialType];
             }
         };
+    </script>
+} *@
+
+
+
+
+
+
+
+
+@page "{id:int}"
+@model JegyMester.Pages.Tickets.BuyModel
+
+<h2>Jegyvásárlás</h2>
+<hr />
+
+@if (Model.Screening.StartTime <= DateTime.Now)
+{
+    <div class="alert alert-danger">
+        Ez a vetítés már elkezdődött vagy lejárt, jegyvásárlás nem lehetséges.
+    </div>
+    <a class="btn btn-secondary mt-2" href="/VetitesekLista">Vissza a vetítésekhez</a>
+}
+else
+{
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4>@Model.Screening.Film.Title</h4>
+            <p>
+                <strong>Időpont:</strong> @Model.Screening.StartTime.ToString("yyyy.MM.dd. HH:mm") <br />
+                <strong>Terem:</strong> @Model.Screening.Room.Id
+            </p>
+        </div>
+    </div>
+
+    <h4>Helyfoglalás</h4>
+    <table class="table table-bordered text-center" style="max-width: 600px;">
+        @for (int r = 1; r <= Model.Screening.Room.RowCount; r++)
+        {
+            <tr>
+                @for (int s = 1; s <= Model.Screening.Room.SeatsPerRow; s++)
+                {
+                    int seatNumber = (r - 1) * Model.Screening.Room.SeatsPerRow + s;
+                    bool taken = Model.TakenSeats.Any(ts => ts.Row == r && ts.Seat == seatNumber);
+
+                    <td style="padding: 6px;">
+                        @if (taken)
+                        {
+                            <span class="badge bg-danger">X</span>
+                        }
+                        else
+                        {
+                            <button type="button"
+                                    class="btn btn-success btn-sm seat-btn"
+                                    data-row="@r"
+                                    data-seat="@seatNumber"
+                                    data-col="@s"
+                                    onclick="selectSeat(this)">
+                                @s
+                            </button>
+                        }
+                    </td>
+                }
+            </tr>
+        }
+    </table>
+
+    <form method="post" id="buyForm" class="mt-4">
+        <input type="hidden" asp-for="ScreeningId" />
+        <input type="hidden" id="selectedTicketsJson" name="SelectedTicketsJson" />
+
+        <div class="mb-3">
+            <label class="form-label">Alapértelmezett jegytípus</label>
+            <select class="form-select" id="ticketTypeSelect">
+                @foreach (var type in Enum.GetValues(typeof(JegyMester.DataContext.Enums.TicketType)))
+                {
+                    <option value="@type">@type</option>
+                }
+            </select>
+            <small class="text-muted">A kijelölés előtt válaszd ki a típust.</small>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header bg-dark text-white">Kiválasztott helyek</div>
+            <ul class="list-group list-group-flush" id="selectedSeatsList">
+                <li class="list-group-item text-muted">Még nincs kiválasztott hely.</li>
+            </ul>
+        </div>
+
+        @* Vendég adatok rész *@
+        @if (HttpContext.Session.GetString("UserId") == null)
+        {
+            <div class="card p-3 mb-3 bg-light">
+                <h5>Vendég adatok</h5>
+                <div class="mb-3">
+                    <label class="form-label">E-mail cím</label>
+                    <input asp-for="GuestEmail" class="form-control" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Telefonszám</label>
+                    <input asp-for="GuestPhone" class="form-control" required />
+                </div>
+            </div>
+        }
+
+        <button type="submit" class="btn btn-primary w-100" id="submitBtn" disabled>
+            Válassz legalább egy helyet!
+        </button>
+    </form>
+
+    <script>
+        let selectedTickets = [];
+        const prices = {
+            @foreach (var type in Enum.GetValues(typeof(JegyMester.DataContext.Enums.TicketType)))
+            {
+                <text>"@type": @Model.GetPrice((JegyMester.DataContext.Enums.TicketType)type),</text>
+            }
+        };
+
+        function selectSeat(btn) {
+            const row = parseInt(btn.getAttribute("data-row"));
+            const seatNum = parseInt(btn.getAttribute("data-seat"));
+            const col = parseInt(btn.getAttribute("data-col"));
+            const type = document.getElementById("ticketTypeSelect").value;
+
+            const index = selectedTickets.findIndex(t => t.seatNumber === seatNum);
+
+            if (index > -1) {
+                selectedTickets.splice(index, 1);
+                btn.classList.replace("btn-warning", "btn-success");
+            } else {
+                selectedTickets.push({
+                    row: row,
+                    seatNumber: seatNum,
+                    column: col,
+                    type: type,
+                    price: prices[type]
+                });
+                btn.classList.replace("btn-success", "btn-warning");
+            }
+            updateUI();
+        }
+
+        @* function updateUI() {
+            const list = document.getElementById("selectedSeatsList");
+            const btn = document.getElementById("submitBtn");
+            const jsonInput = document.getElementById("selectedTicketsJson");
+
+            if (selectedTickets.length === 0) {
+                list.innerHTML = '<li class="list-group-item text-muted">Nincs választott hely.</li>';
+                btn.disabled = true;
+                btn.innerText = "Válassz legalább egy helyet!";
+            } else {
+                list.innerHTML = selectedTickets.map(t => 
+                    `<li class="list-group-item d-flex justify-content-between align-items-center">
+                        ${t.row}. sor, ${t.column}. szék (${t.type})
+                        <span class="badge bg-primary rounded-pill">${t.price} Ft</span>
+                    </li>`
+                ).join("");
+                
+                const total = selectedTickets.reduce((sum, t) => sum + t.price, 0);
+                btn.disabled = false;
+                btn.innerText = `${selectedTickets.length} jegy megvétele (${total} Ft)`;
+            }
+            jsonInput.value = JSON.stringify(selectedTickets);
+        } *@
+
+        function updateUI() {
+    const list = document.getElementById("selectedSeatsList");
+    const btn = document.getElementById("submitBtn");
+    const jsonInput = document.getElementById("selectedTicketsJson");
+
+    if (selectedTickets.length === 0) {
+        list.innerHTML = '<li class="list-group-item text-muted">Nincs választott hely.</li>';
+        btn.disabled = true;
+        btn.innerText = "Válassz legalább egy helyet!";
+    } else {
+        // Itt a változás: hozzáadunk egy törlés gombot (btn-outline-danger)
+        list.innerHTML = selectedTickets.map((t, index) => 
+            `<li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>${t.row}. sor, ${t.column}. szék</strong> <br/>
+                    <small class="text-muted">${t.type} - ${t.price} Ft</small>
+                </div>
+                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeSeat(${t.seatNumber})">
+                    <i class="bi bi-trash"></i> Törlés
+                </button>
+            </li>`
+        ).join("");
+        
+        const total = selectedTickets.reduce((sum, t) => sum + t.price, 0);
+        btn.disabled = false;
+        btn.innerText = `${selectedTickets.length} jegy megvétele (${total} Ft)`;
+    }
+    jsonInput.value = JSON.stringify(selectedTickets);
+}
+
+// Új függvény a listából való törléshez
+function removeSeat(seatNumber) {
+    // 1. Megkeressük a gombot a táblázatban, hogy visszaállítsuk a színét
+    const tableBtn = document.querySelector(`button[data-seat="${seatNumber}"]`);
+    if (tableBtn) {
+        tableBtn.classList.replace("btn-warning", "btn-success");
+    }
+
+    // 2. Kivesszük a listából
+    selectedTickets = selectedTickets.filter(t => t.seatNumber !== seatNumber);
+
+    // 3. Frissítjük a felületet
+    updateUI();
+}
     </script>
 }
