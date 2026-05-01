@@ -12,6 +12,7 @@
 
 <form method="post" id="sellForm">
     @Html.AntiForgeryToken()
+
     <div class="mb-3">
         <label class="form-label">Screening</label>
         <select id="screeningSelect" class="form-select">
@@ -23,15 +24,13 @@
         </select>
     </div>
 
-    <div>
-    <button type="button" id="addRowBtn" class="btn btn-success">Add Ticket</button>
-    </div>
+    <button type="button" id="addRowBtn" class="btn btn-success mb-3">Add Ticket</button>
 
     <div id="rowsContainer" class="mb-3"></div>
 
     <div class="mb-3">
         <label>User Id (cashier or guest)</label>
-        <input asp-for="ticketPurchase.UserId" class="form-control" />
+        <input asp-for="TicketPurchase.UserId" class="form-control" />
     </div>
 
     <div class="mb-3">
@@ -41,17 +40,16 @@
 </form>
 
 @section Scripts {
-<script>
+    <script>
         document.addEventListener("DOMContentLoaded", function () {
 
             const container = document.getElementById('rowsContainer');
             const screeningSelect = document.getElementById('screeningSelect');
             const addBtn = document.getElementById('addRowBtn');
-            const removeBtn = document.getElementById('Remove');
 
             let index = 0;
 
-            function createRow(initialScreeningId) {
+            function createRow() {
                 const row = document.createElement('div');
                 row.className = 'd-flex gap-2 align-items-end mb-2';
 
@@ -65,7 +63,7 @@
                 typeSelect.name = `Items[${index}].Type`;
 
                 const types = @Html.Raw(Json.Serialize(Enum.GetNames(typeof(TicketType))));
-                
+
                 types.forEach((t, i) => {
                     const opt = document.createElement('option');
                     opt.value = i;
@@ -88,8 +86,12 @@
                 const removeBtn = document.createElement('button');
                 removeBtn.type = 'button';
                 removeBtn.textContent = 'Remove';
-                removeBtn.id = 'Remove';
-                removeBtn.onclick = () => row.remove();
+                removeBtn.className = 'btn btn-danger';
+
+                removeBtn.onclick = () => {
+                    row.remove();
+                    reindex();
+                };
 
                 row.appendChild(screeningInput);
                 row.appendChild(typeSelect);
@@ -102,47 +104,36 @@
             }
 
             addBtn.addEventListener('click', function () {
-                const screenId = screeningSelect.value;
-
-                if (!screenId) {
+                if (!screeningSelect.value) {
                     alert("Select a screening first!");
                     return;
                 }
 
-                const newRow = createRow(screenId);
+                const newRow = createRow();
                 container.appendChild(newRow);
             });
 
-            document.getElementById("sellForm").addEventListener("submit", function () {
-            const rows = container.children;
+            document.getElementById("sellForm").addEventListener("submit", function (e) {
+                if (container.children.length === 0) {
+                    e.preventDefault();
+                    alert("Add at least one ticket!");
+                }
+            });
 
-            for (let i = 0; i < rows.length; i++) {
-                const hidden = rows[i].querySelector(`input[name^="Items"][name$=".ScreeningId"]`);
-                hidden.value = screeningSelect.value;
+            function reindex() {
+                const rows = container.children;
+                for (let i = 0; i < rows.length; i++) {
+                    rows[i].querySelectorAll("input, select").forEach(el => {
+                        el.name = el.name.replace(/Items
+
+        \[\d+\]
+
+        /, `Items[${i}]`);
+                    });
+                }
+                index = rows.length;
             }
-});
-                    document.getElementById("sellForm").addEventListener("submit", function (e) {
-                    if (container.children.length === 0) {
-                        e.preventDefault();
-                        alert("Add at least one ticket!");
-                    }
-        });
-
-        function reindex() {
-            const rows = container.children;
-            for (let i = 0; i < rows.length; i++) {
-                rows[i].querySelectorAll("input, select").forEach(el => {
-                    el.name = el.name.replace(/Items\[\d+\]/, `Items[${i}]`);
-                });
-            }
-            index = rows.length;
-}
-
-        removeBtn.onclick = () => {
-            row.remove();
-            reindex();
-        };
 
         });
-</script>
+    </script>
 }

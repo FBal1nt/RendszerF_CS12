@@ -30,14 +30,17 @@ namespace JegyMester.Pages.Tickets
             int userId = int.Parse(userIdClaim);
 
             Purchases = await _context.TicketPurchases
-                .Include(tp => tp.Tickets)
-                    .ThenInclude(t => t.Screening)
-                        .ThenInclude(s => s.Film)
-                .Include(tp => tp.Tickets)
-                    .ThenInclude(t => t.Screening.Room)
-                .Where(tp => tp.UserId == userId)
-                .OrderByDescending(tp => tp.PurchaseDateTime)
-                .ToListAsync();
+            .Where(tp => tp.UserId == userId)
+            .Include(tp => tp.Tickets)
+                .ThenInclude(t => t.Screening)
+                    .ThenInclude(s => s.Film)
+            .Include(tp => tp.Tickets)
+                .ThenInclude(t => t.Screening)
+                    .ThenInclude(s => s.Room)
+                        .ThenInclude(r => r.Cinema)
+            .OrderByDescending(tp => tp.PurchaseDateTime)
+            .ToListAsync();
+
 
             return Page();
         }
