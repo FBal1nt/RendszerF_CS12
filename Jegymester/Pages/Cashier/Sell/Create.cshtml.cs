@@ -6,12 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using JegyMester.DataContext.Context;
 using JegyMester.DataContext.Entities;
 using JegyMester.DataContext.Enums;
 
 namespace JegyMester.Pages.Cashier.Sell_ticket
 {
+    [Authorize(Roles = "Cashier")]   // Cashier backend védelem
     public class CreateModel : PageModel
     {
         private readonly JegyMesterDbContext _context;
@@ -21,7 +23,6 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
             _context = context;
         }
 
-        // Simple DTO for the tickets being sold in one purchase
         public class SaleItem
         {
             public int ScreeningId { get; set; }
@@ -33,7 +34,6 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
         [BindProperty]
         public List<SaleItem> Items { get; set; } = new();
 
-        // Optional: if you still want to expose a TicketPurchase model for additional fields
         [BindProperty]
         public TicketPurchase TicketPurchase { get; set; } = new();
 
@@ -49,7 +49,11 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
                 .Take(50)
                 .ToListAsync();
 
-            TicketTypeOptions = new SelectList(Enum.GetValues<TicketType>().Select(t => new { Id = (int)t, Name = t.ToString() }), "Id", "Name");
+            TicketTypeOptions = new SelectList(
+                Enum.GetValues<TicketType>().Select(t => new { Id = (int)t, Name = t.ToString() }),
+                "Id",
+                "Name"
+            );
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -65,8 +69,9 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
                 return Page();
             }
 
-            // Prevent duplicate seat selection within this submission
-            var dup = Items.GroupBy(i => (i.ScreeningId, i.Row, i.SeatNumber)).Any(g => g.Count() > 1);
+            var dup = Items.GroupBy(i => (i.ScreeningId, i.Row, i.SeatNumber))
+                           .Any(g => g.Count() > 1);
+
             if (dup)
             {
                 ModelState.AddModelError(string.Empty, "Duplicate seat in submission.");
@@ -74,15 +79,16 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
                 return Page();
             }
 
-            // Check for existing tickets (atomicity ensured by DB transaction + unique index)
             using var tx = await _context.Database.BeginTransactionAsync();
             try
             {
-                // Build a set of screening/row/seat tuples to check
                 var screeningIds = Items.Select(i => i.ScreeningId).Distinct().ToArray();
+
                 var conflicts = await _context.Tickets
                     .Where(t => screeningIds.Contains(t.ScreeningId) &&
-                                Items.Any(i => i.ScreeningId == t.ScreeningId && i.Row == t.Row && i.SeatNumber == t.SeatNumber))
+                                Items.Any(i => i.ScreeningId == t.ScreeningId &&
+                                               i.Row == t.Row &&
+                                               i.SeatNumber == t.SeatNumber))
                     .ToListAsync();
 
                 if (conflicts.Any())
@@ -93,16 +99,15 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
                     return Page();
                 }
 
-                // Create TicketPurchase
                 var purchase = new TicketPurchase
                 {
                     PurchaseDateTime = DateTime.UtcNow,
-                    UserId = TicketPurchase.UserId // provided by cashier or 0; adjust to use authenticated user if desired
+                    UserId = TicketPurchase.UserId
                 };
+
                 _context.TicketPurchases.Add(purchase);
                 await _context.SaveChangesAsync();
 
-                // Create Tickets
                 foreach (var item in Items)
                 {
                     var ticket = new Ticket
@@ -115,6 +120,7 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
                         Price = CalculatePrice(item.Type),
                         TicketPurchaseId = purchase.Id
                     };
+
                     _context.Tickets.Add(ticket);
                 }
 
@@ -136,13 +142,14 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
         {
             return type switch
             {
-                TicketType.Adult => 100m,
-                TicketType.Student => 80m,
-                TicketType.Child => 60m,
-                TicketType.Senior => 70m,
-                TicketType.VIP => 200m,
-                _ => 100m
+                TicketType.Adult => 2000,
+                TicketType.Student => 1500,
+                TicketType.Child => 1200,
+                TicketType.Senior => 1500,
+                TicketType.VIP => 3500,
+                _ => 2000
             };
         }
+
     }
 }

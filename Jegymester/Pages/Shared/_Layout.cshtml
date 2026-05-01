@@ -1,6 +1,4 @@
-﻿@using Microsoft.AspNetCore.Http
-@inject IHttpContextAccessor HttpContextAccessor
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -16,70 +14,77 @@
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
                 <a class="navbar-brand" asp-area="" asp-page="/Index">JegyMester</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
-                        </li>
-                        @if (HttpContextAccessor.HttpContext.Session.GetString("IsAdmin") == "true")
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/AdminIndex">Admin</a>
-                            </li>
-                        }
-                        @if (HttpContextAccessor.HttpContext.Session.GetString("IsCashier") == "true")
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/Cashier/Index">Cashier</a>
-                            </li>
-                        }
-                        @* Áthelyeztem ide hogy a bejelentkezett felhasználók is tudják a vetítések és a filmek fület megnézni*@
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/FilmekLista">Filmek</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/VetitesekLista">Vetítések</a>
-                        </li>
-                        @if (HttpContextAccessor.HttpContext.Session.GetString("UserEmail") == null)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/Login">Bejelentkezés</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/Register">Regisztrálás</a>
-                            </li>
-                            
-                        }
-                        
-                        
-                    </ul>
 
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-page="/Index">Home</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-page="/Privacy">Privacy</a>
+                        </li>
+
+                        @* Admin menü *@
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-page="/AdminIndex">Admin</a>
+                            </li>
+                        }
+
+                        @* Cashier menü *@
+                        @if (User.IsInRole("Cashier"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-page="/Cashier/Index">Cashier</a>
+                            </li>
+                        }
+
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-page="/FilmekLista">Filmek</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-page="/VetitesekLista">Vetítések</a>
+                        </li>
+
+                        @* Ha nincs token → Login/Register *@
+                        @if (!User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-page="/Login">Bejelentkezés</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-page="/Register">Regisztrálás</a>
+                            </li>
+                        }
+                    </ul>
                 </div>
-                @if (HttpContextAccessor.HttpContext.Session.GetString("UserEmail") != null)
+
+                @* Ha van token → Profil menü *@
+                @if (User.Identity.IsAuthenticated)
                 {
                     <div class="dropdown">
                         <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            @HttpContextAccessor.HttpContext.Session.GetString("UserEmail")
+                            @User.FindFirst("email")?.Value
                         </button>
+
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" asp-page="/Profile">Profil</a></li>
-                            <!-- Jegyvásárlás -->
                             <li><a class="dropdown-item" asp-page="/Tickets/MyTickets">Jegyvásárlásaim</a></li>
                             <li><a class="dropdown-item" asp-page="/Logout">Kijelentkezés</a></li>
                         </ul>
                     </div>
                 }
             </div>
-            
         </nav>
     </header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
@@ -88,7 +93,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2026 - JegyMester - <a class="link_footer" asp-area="" asp-page="/Privacy">Privacy</a>
+            &copy; 2026 - JegyMester - <a class="link_footer" asp-page="/Privacy">Privacy</a>
         </div>
     </footer>
 

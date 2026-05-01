@@ -1,11 +1,14 @@
 using JegyMester.DataContext.Context;
 using JegyMester.DataContext.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace JegyMester.Pages.Tickets
 {
+    [Authorize] // 🔥 csak bejelentkezett felhasználó érheti el
     public class MyTicketsModel : PageModel
     {
         private readonly JegyMesterDbContext _context;
@@ -19,13 +22,12 @@ namespace JegyMester.Pages.Tickets
 
         public async Task<IActionResult> OnGetAsync()
         {
-            // A bejelentkezett felhasználó ID-ja
-            var userIdString = HttpContext.Session.GetString("UserId");
-            if (userIdString == null)
-            {
+            // 🔥 User ID a JWT tokenből
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null)
                 return RedirectToPage("/Login");
-            }
-            int userId = int.Parse(userIdString);
+
+            int userId = int.Parse(userIdClaim);
 
             Purchases = await _context.TicketPurchases
                 .Include(tp => tp.Tickets)
@@ -36,15 +38,18 @@ namespace JegyMester.Pages.Tickets
                 .Where(tp => tp.UserId == userId)
                 .OrderByDescending(tp => tp.PurchaseDateTime)
                 .ToListAsync();
+
             return Page();
         }
+
         public async Task<IActionResult> OnPostDeleteAsync(int ticketId)
         {
-            var userIdString = HttpContext.Session.GetString("UserId");
-            if (userIdString == null)
+            // 🔥 User ID a JWT tokenből
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null)
                 return RedirectToPage("/Login");
 
-            int userId = int.Parse(userIdString);
+            int userId = int.Parse(userIdClaim);
 
             // Jegy betöltése
             var ticket = await _context.Tickets
@@ -58,14 +63,14 @@ namespace JegyMester.Pages.Tickets
                 return RedirectToPage();
             }
 
-            // Csak a saját jegy törölhető
+            // 🔥 Csak a saját jegy törölhető
             if (ticket.TicketPurchase.UserId != userId)
             {
                 TempData["Error"] = "Nincs jogosultságod a jegy törléséhez.";
                 return RedirectToPage();
             }
 
-            // 4 órás szabály
+            // 🔥 4 órás szabály
             if (DateTime.Now > ticket.Screening.StartTime.AddHours(-4))
             {
                 TempData["Error"] = "A jegy már nem törölhető (kevesebb mint 4 óra van hátra).";
@@ -89,6 +94,5 @@ namespace JegyMester.Pages.Tickets
             TempData["Message"] = "A jegy sikeresen törölve lett.";
             return RedirectToPage();
         }
-
     }
 }

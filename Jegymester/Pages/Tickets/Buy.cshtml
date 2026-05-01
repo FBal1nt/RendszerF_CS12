@@ -106,7 +106,7 @@ else
             <input class="form-control" id="columnInput" readonly />
         </div>
 
-        @if (HttpContext.Session.GetString("UserId") == null)
+        @if (!User.Identity.IsAuthenticated)
         {
             <div class="mb-3">
                 <label class="form-label">E-mail cím (vendég vásárlás)</label>

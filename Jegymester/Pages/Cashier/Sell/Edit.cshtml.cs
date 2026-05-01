@@ -5,16 +5,18 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using JegyMester.DataContext.Context;
 using JegyMester.DataContext.Entities;
 
 namespace JegyMester.Pages.Cashier.Sell_ticket
 {
+    [Authorize(Roles = "Cashier")]   // Cashier backend védelem
     public class EditModel : PageModel
     {
-        private readonly JegyMester.DataContext.Context.JegyMesterDbContext _context;
+        private readonly JegyMesterDbContext _context;
 
-        public EditModel(JegyMester.DataContext.Context.JegyMesterDbContext context)
+        public EditModel(JegyMesterDbContext context)
         {
             _context = context;
         }
@@ -24,10 +26,15 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+                return NotFound();
 
-            var purchase = await _context.TicketPurchases.FindAsync(id);
-            if (purchase == null) return NotFound();
+            var purchase = await _context.TicketPurchases
+                .AsNoTracking()
+                .FirstOrDefaultAsync(tp => tp.Id == id);
+
+            if (purchase == null)
+                return NotFound();
 
             TicketPurchase = purchase;
             return Page();
@@ -35,26 +42,25 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid) return Page();
+            if (!ModelState.IsValid)
+                return Page();
 
-            _context.Attach(TicketPurchase).State = EntityState.Modified;
+            var purchaseFromDb = await _context.TicketPurchases
+                .FirstOrDefaultAsync(tp => tp.Id == TicketPurchase.Id);
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TicketPurchaseExists(TicketPurchase.Id)) return NotFound();
-                throw;
-            }
+            if (purchaseFromDb == null)
+                return NotFound();
+
+            // Csak a megengedett mezők frissítése
+            purchaseFromDb.PurchaseDateTime = TicketPurchase.PurchaseDateTime;
+
+            // UserId NEM módosítható itt
+            // GuestEmail / GuestPhone NEM módosítható itt
+            // Jegyek NEM módosíthatók itt
+
+            await _context.SaveChangesAsync();
 
             return RedirectToPage("./Details", new { id = TicketPurchase.Id });
-        }
-
-        private bool TicketPurchaseExists(int id)
-        {
-            return _context.TicketPurchases.Any(e => e.Id == id);
         }
     }
 }

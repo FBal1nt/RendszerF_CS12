@@ -5,16 +5,18 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using JegyMester.DataContext.Context;
 using UserEntity = JegyMester.DataContext.Entities.User;
 
 namespace JegyMester.Pages.User
 {
+    [Authorize(Roles = "Admin")]   // Admin backend védelem
     public class DeleteModel : PageModel
     {
-        private readonly JegyMester.DataContext.Context.JegyMesterDbContext _context;
+        private readonly JegyMesterDbContext _context;
 
-        public DeleteModel(JegyMester.DataContext.Context.JegyMesterDbContext context)
+        public DeleteModel(JegyMesterDbContext context)
         {
             _context = context;
         }
@@ -25,33 +27,35 @@ namespace JegyMester.Pages.User
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var user = await _context.Users.FirstOrDefaultAsync(m => m.Id == id);
+            var user = await _context.Users
+                .Include(u => u.Roles)
+                .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (user is not null)
-            {
-                User = user;
+            if (user == null)
+                return NotFound();
 
-                return Page();
-            }
-
-            return NotFound();
+            User = user;
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var user = await _context.Users.FindAsync(id);
+            var user = await _context.Users
+                .Include(u => u.Roles)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
             if (user != null)
             {
                 User = user;
+
+                // Kapcsolatok törlése (User–Role many-to-many)
+                user.Roles.Clear();
+
                 _context.Users.Remove(User);
                 await _context.SaveChangesAsync();
             }

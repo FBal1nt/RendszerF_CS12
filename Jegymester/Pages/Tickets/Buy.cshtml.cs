@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using JegyMester.DataContext.Context;
 using JegyMester.DataContext.Entities;
 using JegyMester.DataContext.Enums;
+using System.Security.Claims;
 
 namespace JegyMester.Pages.Tickets
 {
@@ -20,8 +21,8 @@ namespace JegyMester.Pages.Tickets
 
         [BindProperty]
         public int ScreeningId { get; set; }
-        public bool IsExpired => Screening != null && Screening.StartTime <= DateTime.Now;
 
+        public bool IsExpired => Screening != null && Screening.StartTime <= DateTime.Now;
 
         [BindProperty]
         public TicketType SelectedType { get; set; }
@@ -31,6 +32,7 @@ namespace JegyMester.Pages.Tickets
 
         [BindProperty]
         public int SeatNumber { get; set; }
+
         public decimal CurrentPrice => GetPrice(SelectedType);
 
         [BindProperty]
@@ -40,6 +42,7 @@ namespace JegyMester.Pages.Tickets
         public string? GuestPhone { get; set; }
 
         public List<(int Row, int Seat)> TakenSeats { get; set; } = new();
+
         public async Task<IActionResult> OnGetAsync(int id)
         {
             ScreeningId = id;
@@ -52,7 +55,6 @@ namespace JegyMester.Pages.Tickets
             if (Screening == null)
                 return NotFound();
 
-            // Foglalt helyek lekérése – EZ KELL IDE
             TakenSeats = await _context.Tickets
                 .Where(t => t.ScreeningId == id && t.Valid == true)
                 .Select(t => new ValueTuple<int, int>(t.Row, t.SeatNumber))
@@ -61,14 +63,13 @@ namespace JegyMester.Pages.Tickets
             return Page();
         }
 
-
-
         public async Task<IActionResult> OnPostAsync()
         {
-            var userIdString = HttpContext.Session.GetString("UserId");
+            // JWT user ID
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int? userId = userIdClaim != null ? int.Parse(userIdClaim) : null;
 
-            int? userId = userIdString != null ? int.Parse(userIdString) : null;
-
+            // Vendég vásárlás ellenőrzése
             if (userId == null)
             {
                 if (string.IsNullOrWhiteSpace(GuestEmail) || string.IsNullOrWhiteSpace(GuestPhone))
@@ -78,38 +79,22 @@ namespace JegyMester.Pages.Tickets
                 }
             }
 
-            
-
-
-            // 1) Vetítés betöltése
+            // Vetítés betöltése
             var screening = await _context.Screenings
                 .Include(s => s.Film)
                 .Include(s => s.Room)
                 .FirstOrDefaultAsync(s => s.Id == ScreeningId);
+
+            if (screening == null)
+                return NotFound();
+
             if (screening.StartTime <= DateTime.Now)
             {
                 TempData["Error"] = "Ez a vetítés már elkezdődött vagy lejárt, jegyvásárlás nem lehetséges.";
                 return RedirectToPage(new { id = ScreeningId });
             }
 
-
-
-            if (screening == null)
-                return NotFound();
-
-            // 2) Vásárlás létrehozása
-            var purchase = new TicketPurchase
-            {
-                UserId = userId,
-                GuestEmail = userId == null ? GuestEmail : null,
-                GuestPhone = userId == null ? GuestPhone : null,
-                PurchaseDateTime = DateTime.Now
-            };
-
-            _context.TicketPurchases.Add(purchase);
-            await _context.SaveChangesAsync(); // kell, hogy legyen purchase.Id
-
-            // 2.5) Helyfoglalás ellenőrzése  ⬇⬇⬇ IDE
+            // Helyfoglalás ellenőrzése
             bool seatTaken = await _context.Tickets.AnyAsync(t =>
                 t.ScreeningId == ScreeningId &&
                 t.Row == Row &&
@@ -123,7 +108,19 @@ namespace JegyMester.Pages.Tickets
                 return RedirectToPage(new { id = ScreeningId });
             }
 
-            // 3) Jegy létrehozása
+            // Vásárlás létrehozása
+            var purchase = new TicketPurchase
+            {
+                UserId = userId,
+                GuestEmail = userId == null ? GuestEmail : null,
+                GuestPhone = userId == null ? GuestPhone : null,
+                PurchaseDateTime = DateTime.Now
+            };
+
+            _context.TicketPurchases.Add(purchase);
+            await _context.SaveChangesAsync();
+
+            // Jegy létrehozása
             var ticket = new Ticket
             {
                 ScreeningId = ScreeningId,
@@ -139,18 +136,12 @@ namespace JegyMester.Pages.Tickets
             await _context.SaveChangesAsync();
 
             TempData["Message"] = "Sikeres jegyvásárlás!";
-            if (userId != null)
-            {
-                // Bejelentkezett felhasználó → MyTickets
-                return RedirectToPage("/Tickets/MyTickets");
-            }
-            else
-            {
-                // Vendég → főoldal
-                return RedirectToPage("/Index");
-            }
-        }
 
+            if (userId != null)
+                return RedirectToPage("/Tickets/MyTickets");
+
+            return RedirectToPage("/Index");
+        }
 
         private decimal GetPrice(TicketType type)
         {
@@ -164,7 +155,5 @@ namespace JegyMester.Pages.Tickets
                 _ => 2000
             };
         }
-
-
     }
 }

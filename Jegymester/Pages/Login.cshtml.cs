@@ -1,23 +1,26 @@
 ﻿using JegyMester.DataContext.Context;
+using JegyMester.DataContext.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 public class LoginModel : PageModel
 {
     private readonly JegyMesterDbContext _db;
+    private readonly IConfiguration _config;
 
-    public LoginModel(JegyMesterDbContext db)
+    public LoginModel(JegyMesterDbContext db, IConfiguration config)
     {
         _db = db;
+        _config = config;
     }
 
-    [BindProperty]
-    public string Email { get; set; }
-
-    [BindProperty]
-    public string Password { get; set; }
-
+    [BindProperty] public string Email { get; set; }
+    [BindProperty] public string Password { get; set; }
     public string ErrorMessage { get; set; }
 
     public async Task<IActionResult> OnPostAsync()
@@ -26,24 +29,59 @@ public class LoginModel : PageModel
             .Include(u => u.Roles)
             .FirstOrDefaultAsync(u => u.Email == Email);
 
-        if (user == null || user.Password != Password)
+        if (user == null)
         {
             ErrorMessage = "Hibás email vagy jelszó.";
             return Page();
         }
 
-        // Sikeres login → session beállítása
-        HttpContext.Session.SetString("UserId", user.Id.ToString());
-        HttpContext.Session.SetString("UserEmail", user.Email);
+        // BCrypt jelszó ellenőrzés
+        if (!BCrypt.Net.BCrypt.Verify(Password, user.PasswordHash))
+        {
+            ErrorMessage = "Hibás email vagy jelszó.";
+            return Page();
+        }
 
-        // Admin szerep mentése
-        var isAdmin = user.Roles.Any(r => r.Name == "Admin");
-        HttpContext.Session.SetString("IsAdmin", isAdmin ? "true" : "false");
-        // Jelöljük, ha az user cashier szerepű
-        var isCashier = user.Roles.Any(r => r.Name == "Cashier");
-        HttpContext.Session.SetString("IsCashier", isCashier ? "true" : "false");
+        // JWT token generálása
+        var token = GenerateJwtToken(user);
+
+        // Token cookie-ba tétele
+        HttpContext.Response.Cookies.Append("auth_token", token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Strict,
+            Expires = DateTimeOffset.UtcNow.AddHours(3)
+        });
 
         return RedirectToPage("/Index");
     }
 
+    private string GenerateJwtToken(User user)
+    {
+        var key = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        // 🔥 Biztonságos szerepkör lekérés
+        var roleName = user.Roles.FirstOrDefault()?.Name ?? "User";
+
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, roleName)
+        };
+
+        var token = new JwtSecurityToken(
+            issuer: _config["Jwt:Issuer"],
+            audience: _config["Jwt:Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddHours(3),
+            signingCredentials: creds
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
 }

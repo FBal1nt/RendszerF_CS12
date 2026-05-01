@@ -13,14 +13,9 @@ public class RegisterModel : PageModel
         _db = db;
     }
 
-    [BindProperty]
-    public string Email { get; set; }
-
-    [BindProperty]
-    public string Password { get; set; }
-
-    [BindProperty]
-    public string ConfirmPassword { get; set; }
+    [BindProperty] public string Email { get; set; }
+    [BindProperty] public string Password { get; set; }
+    [BindProperty] public string ConfirmPassword { get; set; }
 
     public string ErrorMessage { get; set; }
 
@@ -41,10 +36,13 @@ public class RegisterModel : PageModel
             return Page();
         }
 
+        // 🔥 Jelszó hash-elése BCrypt-tel
+        var hashed = BCrypt.Net.BCrypt.HashPassword(Password);
+
         var user = new User
         {
             Email = Email,
-            Password = Password // később hash-elünk
+            PasswordHash = hashed
         };
 
         _db.Users.Add(user);

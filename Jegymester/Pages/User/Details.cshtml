@@ -2,64 +2,26 @@
 @model JegyMester.Pages.User.DetailsModel
 
 <div>
-    <h4>User</h4>
+    <h4>Felhasználó adatai</h4>
     <hr />
     <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Name)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Name)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Email)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.Email)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.PhoneNumber)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.User.PhoneNumber)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.User.Password)
-        </dt>
-        <dd class="col-sm-10">
-            <div class="input-group">
-                <input id="pwd-@Model.User.Id" type="password" readonly class="form-control-plaintext" value="@Model.User.Password" />
-                <button type="button" class="btn btn-sm btn-outline-secondary toggle-pwd" data-target="#pwd-@Model.User.Id">Mutat</button>
-            </div>
-        </dd>
-        <dt class="col-sm-2">
-            Szerepek
-        </dt>
+        <dt class="col-sm-2">Név</dt>
+        <dd class="col-sm-10">@Model.User.Name</dd>
+
+        <dt class="col-sm-2">E-mail</dt>
+        <dd class="col-sm-10">@Model.User.Email</dd>
+
+        <dt class="col-sm-2">Telefonszám</dt>
+        <dd class="col-sm-10">@Model.User.PhoneNumber</dd>
+
+        <dt class="col-sm-2">Szerepek</dt>
         <dd class="col-sm-10">
             @string.Join(", ", Model.User.Roles.Select(r => r.Name))
         </dd>
     </dl>
 </div>
-<div>
-    <a asp-page="./Edit" asp-route-id="@Model.User.Id">Edit</a> |
-    <a asp-page="/AdminIndex">Vissza az Admin oldalra</a>
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.toggle-pwd').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var selector = btn.getAttribute('data-target');
-                var input = document.querySelector(selector);
-                if (!input) return;
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    btn.textContent = 'Rejt';
-                } else {
-                    input.type = 'password';
-                    btn.textContent = 'Mutat';
-                }
-            });
-        });
-    });
-</script>
+<div class="mt-3">
+    <a asp-page="./Edit" asp-route-id="@Model.User.Id" class="btn btn-primary">Szerkesztés</a>
+    <a asp-page="/AdminIndex" class="btn btn-secondary">Vissza</a>
+</div>

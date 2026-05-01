@@ -2,76 +2,34 @@
 @model JegyMester.Pages.User.IndexModel
 
 <p>
-    <a asp-page="Create" class="btn btn-success">Create New</a>
+    <a asp-page="Create" class="btn btn-success">Új felhasználó</a>
     <a asp-page="/AdminIndex" class="btn btn-secondary">Vissza az Admin oldalra</a>
 </p>
-<table class="table">
+
+<table class="table table-striped">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.User[0].Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.User[0].Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.User[0].PhoneNumber)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.User[0].Password)
-            </th>
-            <th>
-                Szerepek
-            </th>
-            <th></th>
+            <th>Név</th>
+            <th>E-mail</th>
+            <th>Telefonszám</th>
+            <th>Szerepek</th>
+            <th>Műveletek</th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.User) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PhoneNumber)
-            </td>
-            <td>
-                <div class="input-group">
-                    <input id="pwd-@item.Id" type="password" readonly class="form-control form-control-sm" value="@item.Password" />
-                    <button type="button" class="btn btn-sm btn-outline-secondary toggle-pwd" data-target="#pwd-@item.Id">Mutat</button>
-                </div>
-            </td>
-            <td>
-                @string.Join(", ", item.Roles.Select(r => r.Name))
-            </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model.User)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Email</td>
+                <td>@item.PhoneNumber</td>
+                <td>@string.Join(", ", item.Roles.Select(r => r.Name))</td>
+                <td>
+                    <a asp-page="./Edit" asp-route-id="@item.Id">Szerkesztés</a> |
+                    <a asp-page="./Details" asp-route-id="@item.Id">Részletek</a> |
+                    <a asp-page="./Delete" asp-route-id="@item.Id">Törlés</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.toggle-pwd').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var selector = btn.getAttribute('data-target');
-                var input = document.querySelector(selector);
-                if (!input) return;
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    btn.textContent = 'Rejt';
-                } else {
-                    input.type = 'password';
-                    btn.textContent = 'Mutat';
-                }
-            });
-        });
-    });
-</script>

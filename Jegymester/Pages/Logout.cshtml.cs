@@ -7,7 +7,9 @@ namespace JegyMester.Pages
     {
         public IActionResult OnGet()
         {
-            HttpContext.Session.Clear();
+            // JWT token törlése
+            HttpContext.Response.Cookies.Delete("auth_token");
+
             return RedirectToPage("/Login");
         }
     }

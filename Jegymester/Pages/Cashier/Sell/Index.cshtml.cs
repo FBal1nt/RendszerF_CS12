@@ -4,11 +4,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using JegyMester.DataContext.Context;
 using JegyMester.DataContext.Entities;
 
 namespace JegyMester.Pages.Cashier.Sell_ticket
 {
+    [Authorize(Roles = "Cashier")]   // Cashier backend védelem
     public class IndexModel : PageModel
     {
         private readonly JegyMesterDbContext _context;
@@ -18,7 +20,6 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
             _context = context;
         }
 
-        // Filters
         [BindProperty(SupportsGet = true)]
         public string? Search { get; set; }
 
@@ -42,14 +43,13 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
 
             if (!string.IsNullOrWhiteSpace(Search))
             {
-                // allow searching by user id or purchase id
                 if (Search.Contains("@"))
                 {
-                    var user = _context.Users.Where(f => f.Email.Contains(Search.ToString())).FirstOrDefault();Console.WriteLine($"=========================================={user.Name}========================================");
+                    var user = _context.Users
+                        .FirstOrDefault(f => f.Email.Contains(Search));
+
                     if (user != null)
-                    {
                         q = q.Where(tp => tp.UserId == user.Id);
-                    }
                 }
                 else if (int.TryParse(Search, out var n))
                 {
@@ -57,28 +57,27 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
                 }
                 else
                 {
-                    // fallback: search in related film title (if loaded)
-                    q = q.Where(tp => tp.Tickets.Any(t => t.Screening != null && EF.Functions.Like(t.Screening.Film!.Title!, $"%{Search}%")));
+                    q = q.Where(tp =>
+                        tp.Tickets.Any(t =>
+                            t.Screening != null &&
+                            EF.Functions.Like(t.Screening.Film!.Title!, $"%{Search}%")
+                        )
+                    );
                 }
             }
 
             if (From.HasValue)
-            {
                 q = q.Where(tp => tp.PurchaseDateTime >= From.Value);
-            }
 
             if (To.HasValue)
-            {
                 q = q.Where(tp => tp.PurchaseDateTime <= To.Value);
-            }
 
             TicketPurchases = await q
                 .OrderByDescending(tp => tp.PurchaseDateTime)
-                .Take(200) // limit to recent 200 for performance
+                .Take(200)
                 .ToListAsync();
         }
 
-        // Revert (cancel) an entire purchase: delete tickets then purchase in a transaction
         public async Task<IActionResult> OnPostRevertAsync(int id)
         {
             using var tx = await _context.Database.BeginTransactionAsync();
@@ -94,7 +93,6 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
                     return RedirectToPage();
                 }
 
-                // remove tickets (frees seats)
                 _context.Tickets.RemoveRange(purchase.Tickets);
                 _context.TicketPurchases.Remove(purchase);
 

@@ -5,16 +5,18 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using JegyMester.DataContext.Context;
 using JegyMester.DataContext.Entities;
 
 namespace JegyMester.Pages.Cashier.Sell_ticket
 {
+    [Authorize(Roles = "Cashier")]   // Cashier backend védelem
     public class DeleteModel : PageModel
     {
-        private readonly JegyMester.DataContext.Context.JegyMesterDbContext _context;
+        private readonly JegyMesterDbContext _context;
 
-        public DeleteModel(JegyMester.DataContext.Context.JegyMesterDbContext context)
+        public DeleteModel(JegyMesterDbContext context)
         {
             _context = context;
         }
@@ -25,34 +27,36 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
         public async Task<IActionResult> OnGetAsync(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var ticketpurchase = await _context.TicketPurchases.FirstOrDefaultAsync(m => m.Id == id);
+            var purchase = await _context.TicketPurchases
+                .Include(tp => tp.Tickets)
+                .FirstOrDefaultAsync(tp => tp.Id == id);
 
-            if (ticketpurchase is not null)
-            {
-                TicketPurchase = ticketpurchase;
+            if (purchase == null)
+                return NotFound();
 
-                return Page();
-            }
-
-            return NotFound();
+            TicketPurchase = purchase;
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
-            }
 
-            var ticketpurchase = await _context.TicketPurchases.FindAsync(id);
-            if (ticketpurchase != null)
+            var purchase = await _context.TicketPurchases
+                .Include(tp => tp.Tickets)
+                .FirstOrDefaultAsync(tp => tp.Id == id);
+
+            if (purchase != null)
             {
-                TicketPurchase = ticketpurchase;
-                _context.TicketPurchases.Remove(TicketPurchase);
+                // Jegyek törlése először
+                _context.Tickets.RemoveRange(purchase.Tickets);
+
+                // Majd a vásárlás törlése
+                _context.TicketPurchases.Remove(purchase);
+
                 await _context.SaveChangesAsync();
             }
 

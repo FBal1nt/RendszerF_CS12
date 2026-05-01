@@ -4,21 +4,30 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Authorization;
 using JegyMester.DataContext.Context;
 using UserEntity = JegyMester.DataContext.Entities.User;
 using RoleEntity = JegyMester.DataContext.Entities.Role;
 
 namespace JegyMester.Pages.User
 {
+    [Authorize(Roles = "Admin")]   // Admin backend védelem
     public class CreateModel : PageModel
     {
-        private readonly JegyMester.DataContext.Context.JegyMesterDbContext _context;
+        private readonly JegyMesterDbContext _context;
 
-        public CreateModel(JegyMester.DataContext.Context.JegyMesterDbContext context)
+        public CreateModel(JegyMesterDbContext context)
         {
             _context = context;
         }
+
+        [BindProperty]
+        public UserEntity User { get; set; } = default!;
+
+        [BindProperty]
+        public List<int> SelectedRoleIds { get; set; } = new();
+
+        public List<RoleEntity> AllRoles { get; set; } = new();
 
         public IActionResult OnGet()
         {
@@ -26,14 +35,6 @@ namespace JegyMester.Pages.User
             return Page();
         }
 
-        [BindProperty]
-        public UserEntity User { get; set; } = default!;
-        [BindProperty]
-        public List<int> SelectedRoleIds { get; set; } = new();
-
-        public List<RoleEntity> AllRoles { get; set; } = new();
-
-        // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
             if (!ModelState.IsValid)
@@ -42,9 +43,19 @@ namespace JegyMester.Pages.User
                 return Page();
             }
 
+            // Jelszó hash-elése
+            if (!string.IsNullOrWhiteSpace(User.PasswordHash))
+            {
+                User.PasswordHash = BCrypt.Net.BCrypt.HashPassword(User.PasswordHash);
+            }
+
+            // Szerepek hozzárendelése
             if (SelectedRoleIds?.Any() ?? false)
             {
-                var roles = _context.Roles.Where(r => SelectedRoleIds.Contains(r.Id)).ToList();
+                var roles = _context.Roles
+                    .Where(r => SelectedRoleIds.Contains(r.Id))
+                    .ToList();
+
                 User.Roles = roles;
             }
 

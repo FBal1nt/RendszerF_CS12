@@ -1,110 +1,84 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using JegyMester.DataContext.Context;
+using JegyMester.DataContext.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using JegyMester.DataContext.Context;
-using UserEntity = JegyMester.DataContext.Entities.User;
-using RoleEntity = JegyMester.DataContext.Entities.Role;
 
 namespace JegyMester.Pages.User
 {
+    [Authorize(Roles = "Admin")]
     public class EditModel : PageModel
     {
-        private readonly JegyMester.DataContext.Context.JegyMesterDbContext _context;
+        private readonly JegyMesterDbContext _db;
 
-        public EditModel(JegyMester.DataContext.Context.JegyMesterDbContext context)
+        public EditModel(JegyMesterDbContext db)
         {
-            _context = context;
+            _db = db;
         }
 
         [BindProperty]
-        public UserEntity User { get; set; } = default!;
+        public DataContext.Entities.User User { get; set; }
 
+        // ÚJ JELSZÓ MEZŐ
+        [BindProperty]
+        public string? NewPassword { get; set; }
+
+        // Szerepkörök
+        public List<DataContext.Entities.Role> AllRoles { get; set; } = new();
         [BindProperty]
         public List<int> SelectedRoleIds { get; set; } = new();
 
-        public List<RoleEntity> AllRoles { get; set; } = new();
-
-        public async Task<IActionResult> OnGetAsync(int? id)
+        public async Task<IActionResult> OnGetAsync(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            User = await _db.Users
+                .Include(u => u.Roles)
+                .FirstOrDefaultAsync(u => u.Id == id);
 
-            var user =  await _context.Users.Include(u => u.Roles).FirstOrDefaultAsync(m => m.Id == id);
-            if (user == null)
-            {
+            if (User == null)
                 return NotFound();
-            }
-            User = user;
-            AllRoles = await _context.Roles.ToListAsync();
-            SelectedRoleIds = user.Roles.Select(r => r.Id).ToList();
+
+            AllRoles = await _db.Roles.ToListAsync();
+            SelectedRoleIds = User.Roles.Select(r => r.Id).ToList();
+
             return Page();
         }
 
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!ModelState.IsValid)
+            var userInDb = await _db.Users
+                .Include(u => u.Roles)
+                .FirstOrDefaultAsync(u => u.Id == User.Id);
+
+            if (userInDb == null)
+                return NotFound();
+
+            // Alapadatok frissítése
+            userInDb.Name = User.Name;
+            userInDb.Email = User.Email;
+            userInDb.PhoneNumber = User.PhoneNumber;
+
+            // Jelszó frissítése, ha megadtak újat
+            if (!string.IsNullOrWhiteSpace(NewPassword))
             {
-                return Page();
+                userInDb.PasswordHash = BCrypt.Net.BCrypt.HashPassword(NewPassword);
             }
 
-            try
+            // Szerepkörök frissítése
+            userInDb.Roles.Clear();
+            if (SelectedRoleIds != null)
             {
-                var userFromDb = await _context.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Id == User.Id);
-                if (userFromDb == null)
-                {
-                    return NotFound();
-                }
+                var roles = await _db.Roles
+                    .Where(r => SelectedRoleIds.Contains(r.Id))
+                    .ToListAsync();
 
-                // update scalar properties
-                userFromDb.Name = User.Name;
-                userFromDb.Email = User.Email;
-                userFromDb.PhoneNumber = User.PhoneNumber;
-                // update password only when a new value was provided
-                if (!string.IsNullOrEmpty(User.Password))
-                {
-                    userFromDb.Password = User.Password;
-                }
-
-                // update roles
-                var roles = SelectedRoleIds?.Any() == true
-                    ? _context.Roles.Where(r => SelectedRoleIds.Contains(r.Id)).ToList()
-                    : new List<RoleEntity>();
-
-                userFromDb.Roles.Clear();
-                foreach (var r in roles)
-                {
-                    userFromDb.Roles.Add(r);
-                }
-
-                await _context.SaveChangesAsync();
+                foreach (var role in roles)
+                    userInDb.Roles.Add(role);
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(User.Id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+
+            await _db.SaveChangesAsync();
 
             return RedirectToPage("./Index");
-        }
-
-        private bool UserExists(int id)
-        {
-            return _context.Users.Any(e => e.Id == id);
         }
     }
 }

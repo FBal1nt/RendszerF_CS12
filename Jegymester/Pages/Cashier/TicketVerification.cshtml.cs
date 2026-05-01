@@ -10,6 +10,7 @@ using JegyMester.DataContext.Entities;
 
 namespace JegyMester.Pages.Cashier
 {
+    [Authorize(Roles = "Cashier")]   // 🔥 Kötelező backend védelem
     public class VerificationModel : PageModel
     {
         private readonly JegyMesterDbContext _context;
@@ -31,18 +32,29 @@ namespace JegyMester.Pages.Cashier
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var ticket =  new Ticket { Id = 0, Price = 0, Row = 0, ScreeningId = 0, SeatNumber = 0, Screening = _context.Screenings.FirstOrDefault(), TicketPurchase = _context.TicketPurchases.FirstOrDefault(), TicketPurchaseId = 0, Type = DataContext.Enums.TicketType.Child, Valid = false };
+            // Üres placeholder ticket, hogy a Razor ne dobjon null reference hibát
+            Ticket = new Ticket
+            {
+                Id = 0,
+                Price = 0,
+                Row = 0,
+                SeatNumber = 0,
+                ScreeningId = 0,
+                Screening = await _context.Screenings.FirstOrDefaultAsync(),
+                TicketPurchase = await _context.TicketPurchases.FirstOrDefaultAsync(),
+                TicketPurchaseId = 0,
+                Type = DataContext.Enums.TicketType.Child,
+                Valid = false
+            };
 
-            Ticket = ticket;
             return Page();
         }
-        
-        // Atomic verify + mark-used using conditional UPDATE
+
+        // Jegy érvényesítése (használatba vétel)
         public async Task<IActionResult> OnPostVerifyAsync(int? id)
         {
             if (id == null) return NotFound();
 
-            // Load ticket + screening for business validation (time window)
             var ticket = await _context.Tickets
                 .Include(t => t.Screening)
                 .FirstOrDefaultAsync(t => t.Id == id);
@@ -62,21 +74,21 @@ namespace JegyMester.Pages.Cashier
             if (ticket.Screening is not null)
             {
                 var now = DateTime.Now;
-                // Adjust allowed window if needed (e.g., allow 10 minutes before start)
-                if (now < ticket.Screening.StartTime.AddMinutes(-10) || now > ticket.Screening.EndTime.AddMinutes(15))
+
+                if (now < ticket.Screening.StartTime.AddMinutes(-10) ||
+                    now > ticket.Screening.EndTime.AddMinutes(15))
                 {
                     StatusMessage = "Ticket is not valid for this screening time.";
                     return RedirectToPage(new { id = ticket.Id });
                 }
             }
 
-            // Final atomic update: mark as used only if still valid
+            // Atomic update
             var rows = await _context.Database.ExecuteSqlInterpolatedAsync(
                 $"UPDATE Tickets SET Valid = 0 WHERE Id = {ticket.Id} AND Valid = 1");
 
             if (rows == 0)
             {
-                // Another process already used it (race) or no state change was possible
                 _logger.LogWarning("Concurrent verification or already used ticket {TicketId} by {User}", ticket.Id, User?.Identity?.Name);
                 StatusMessage = "Ticket could not be verified (already used or concurrent attempt).";
                 return RedirectToPage(new { id = ticket.Id });
@@ -87,13 +99,12 @@ namespace JegyMester.Pages.Cashier
             return RedirectToPage(new { id = ticket.Id });
         }
 
-        // AJAX endpoint to lookup ticket by scanned code or id
-        // Expects form field "code" (barcode or numeric id)
+        // AJAX jegykeresés (QR / ID alapján)
         public async Task<JsonResult> OnPostScanAsync([FromForm] string code)
         {
-            if (string.IsNullOrWhiteSpace(code)) return new JsonResult(new { ok = false, message = "Empty code" });
+            if (string.IsNullOrWhiteSpace(code))
+                return new JsonResult(new { ok = false, message = "Empty code" });
 
-            // Try parse numeric id first
             if (int.TryParse(code, out var id))
             {
                 var ticket = await _context.Tickets
@@ -101,7 +112,8 @@ namespace JegyMester.Pages.Cashier
                     .Include(t => t.TicketPurchase)
                     .FirstOrDefaultAsync(t => t.Id == id);
 
-                if (ticket is null) return new JsonResult(new { ok = false, message = "Ticket not found" });
+                if (ticket is null)
+                    return new JsonResult(new { ok = false, message = "Ticket not found" });
 
                 return new JsonResult(new
                 {
@@ -116,18 +128,34 @@ namespace JegyMester.Pages.Cashier
                 });
             }
 
-            // If using barcode strings, replace above logic to search by barcode column.
             return new JsonResult(new { ok = false, message = "Unsupported code format" });
         }
+
         public async Task<IActionResult> OnPostKeresAsync()
         {
-            // Példa aszinkron adatbázis lekérdezésre
-            Ticket = await _context.Tickets.FirstOrDefaultAsync(x => x.Id == BevittSzam);
+            Ticket = await _context.Tickets
+                .Include(t => t.Screening)
+                .Include(t => t.TicketPurchase)
+                .FirstOrDefaultAsync(x => x.Id == BevittSzam);
 
             if (Ticket is null)
-                Ticket = new Ticket { Id = 0, Price = 0, Row = 0, ScreeningId = 0, SeatNumber = 0, Screening = _context.Screenings.FirstOrDefault(), TicketPurchase = _context.TicketPurchases.FirstOrDefault(), TicketPurchaseId = 0, Type = DataContext.Enums.TicketType.Child, Valid = false };
+            {
+                Ticket = new Ticket
+                {
+                    Id = 0,
+                    Price = 0,
+                    Row = 0,
+                    SeatNumber = 0,
+                    ScreeningId = 0,
+                    Screening = await _context.Screenings.FirstOrDefaultAsync(),
+                    TicketPurchase = await _context.TicketPurchases.FirstOrDefaultAsync(),
+                    TicketPurchaseId = 0,
+                    Type = DataContext.Enums.TicketType.Child,
+                    Valid = false
+                };
+            }
 
-            return Page(); // Maradunk ugyanazon az oldalon
+            return Page();
         }
     }
 }
