@@ -57,6 +57,7 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
 
         public async Task<IActionResult> OnPostAsync()
         {
+            Console.WriteLine($"===============================================Items count POST: {Items?.Count}=================================================================");
             if (Items == null || !Items.Any())
             {
                 ModelState.AddModelError(string.Empty, "No tickets added.");
@@ -84,10 +85,15 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
             try
             {
                 // Build a set of screening/row/seat tuples to check
-                var conflicts = await _context.Tickets
-                    .Where(t => Items.Select(i => new { i.ScreeningId, i.Row, i.SeatNumber })
-                        .Contains(new { t.ScreeningId, t.Row, t.SeatNumber }))
-                    .AnyAsync();
+                var existingTickets = await _context.Tickets
+                .Where(t => t.ScreeningId == Items.First().ScreeningId)
+                .ToListAsync();
+
+                var conflicts = existingTickets.Any(t =>
+                    Items.Any(i =>
+                         i.Row == t.Row &&
+                         i.SeatNumber == t.SeatNumber
+                    ));
 
                 if (conflicts)
                 {

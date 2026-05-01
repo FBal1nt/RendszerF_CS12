@@ -7,6 +7,10 @@
 
 <h1>🎫 Ticket Scanner</h1>
 
+<form method="post" id="antiForgeryForm">
+    @Html.AntiForgeryToken()
+</form>
+
 <div class="mb-3">
     <input type="text" id="scanInput" class="form-control form-control-lg"
            placeholder="Scan or enter ticket code..."
@@ -28,12 +32,14 @@
     const input = document.getElementById("scanInput");
     const result = document.getElementById("result");
     const autoVerify = document.getElementById("autoVerify");
+    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
-        input.addEventListener("keypress", function(e) {
-            if (e.key === "Enter") {
-                handleScan();
-            }
-        });
+            input.addEventListener("keypress", function(e) {
+                if (e.key === "Enter") {
+                    e.preventDefault(); // EZ HIÁNYZIK
+                    handleScan();
+                }
+            });
 
     function handleScan() {
         const code = input.value.trim();
@@ -41,19 +47,36 @@
 
         const handler = autoVerify.checked ? "ScanAndVerify" : "Scan";
 
-        fetch(`?handler=${handler}`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: "code=" + code
-        })
-        .then(res => res.json())
-        .then(data => {
-            renderResult(data);
-            input.value = "";
-            input.focus();
-        });
+            fetch(`?handler=${handler}`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]').value
+        },
+        body: "code=" + code
+    })
+    .then(async res => {
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`HTTP ${res.status}: ${text}`);
+        }
+        return res.json();
+    })
+    .then(data => {
+        if (!data) throw new Error("No data received");
+        renderResult(data);
+        input.value = "";
+        input.focus();
+    })
+    .catch(err => {
+        console.error(err);
+        result.innerHTML = `
+            <div class="alert alert-danger fs-4">
+                ❌ ${err.message}
+            </div>
+        `;
+        playError();
+    });
     }
 
     function renderResult(data) {
@@ -81,7 +104,7 @@
                 </button>
             `;
         } else {
-            html += `<br><strong>${data.message}</strong>`;
+            html += `<br><span class="badge bg-success fs-5">${data.message}</span>`;
         }
 
         html += `</div>`;

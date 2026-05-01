@@ -150,11 +150,13 @@ namespace JegyMester.Pages.Cashier
 
             var now = DateTime.UtcNow;
 
-            if (ticket.Screening != null &&
+            bool ignoreTime = true; // EZT FALSE HA NEM DEBUG MÓDBAN VAGY!!!!!!!!!
+
+            if (!ignoreTime && ticket.Screening != null &&
                (now < ticket.Screening.StartTime.AddMinutes(-10) ||
                 now > ticket.Screening.EndTime.AddMinutes(15)))
             {
-                return new JsonResult(new { ok = false, message = "Invalid time window" });
+                return new JsonResult(new { ok = false, message = "Too early or too late for this screening" });
             }
 
             var rows = await _context.Database.ExecuteSqlInterpolatedAsync(
