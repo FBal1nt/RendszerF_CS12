@@ -37,7 +37,6 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
         {
             var q = _context.TicketPurchases
                 .Include(tp => tp.Tickets)
-                    .ThenInclude(t => t.Screening)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(Search))
@@ -45,7 +44,8 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
                 // allow searching by user id or purchase id
                 if (Search.Contains("@"))
                 {
-                    var user = _context.Users.Where(f => f.Email.Contains(Search.ToString())).FirstOrDefault();Console.WriteLine($"=========================================={user.Name}========================================");
+                    var user = await _context.Users
+                            .FirstOrDefaultAsync(u => u.Email.Contains(Search));
                     if (user != null)
                     {
                         q = q.Where(tp => tp.UserId == user.Id);
@@ -69,7 +69,8 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
 
             if (To.HasValue)
             {
-                q = q.Where(tp => tp.PurchaseDateTime <= To.Value);
+                var toDate = To.Value.Date.AddDays(1);
+                q = q.Where(tp => tp.PurchaseDateTime < toDate);
             }
 
             TicketPurchases = await q

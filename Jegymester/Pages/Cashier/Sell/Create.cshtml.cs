@@ -84,17 +84,12 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
             try
             {
                 // Build a set of screening/row/seat tuples to check
-                var tickets = await _context.Tickets.ToListAsync();
+                var conflicts = await _context.Tickets
+                    .Where(t => Items.Select(i => new { i.ScreeningId, i.Row, i.SeatNumber })
+                        .Contains(new { t.ScreeningId, t.Row, t.SeatNumber }))
+                    .AnyAsync();
 
-                var conflicts = tickets.Where(t =>
-                    Items.Any(i =>
-                        i.ScreeningId == t.ScreeningId &&
-                        i.Row == t.Row &&
-                        i.SeatNumber == t.SeatNumber
-                    )
-                );
-
-                if (conflicts.Any())
+                if (conflicts)
                 {
                     ModelState.AddModelError(string.Empty, "One or more seats are already taken.");
                     await tx.RollbackAsync();
@@ -106,7 +101,7 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
                 var purchase = new TicketPurchase
                 {
                     PurchaseDateTime = DateTime.UtcNow,
-                    UserId = ticketPurchase.UserId // provided by cashier or 0; adjust to use authenticated user if desired
+                    UserId = _context.Users.Where(t => t.Name.Equals("Pénztár")).Select(u => u.Id).FirstOrDefault() // provided by cashier or 0; adjust to use authenticated user if desired
                 };
                 _context.TicketPurchases.Add(purchase);
                 await _context.SaveChangesAsync();
@@ -172,6 +167,16 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
                 TicketType.VIP => 3500,
                 _ => 2000
             };
+        }
+
+        public async Task<JsonResult> OnGetTakenSeatsAsync(int screeningId)
+        {
+            var taken = await _context.Tickets
+                .Where(t => t.ScreeningId == screeningId)
+                .Select(t => new { t.Row, t.SeatNumber })
+                .ToListAsync();
+
+            return new JsonResult(taken);
         }
     }
 }

@@ -1,83 +1,112 @@
-﻿@page 
+﻿@page
 @model JegyMester.Pages.Cashier.VerificationModel
 
 @{
-    ViewData["Title"] = "Verify Tickets";
-    Layout = "~/Pages/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Ticket Scanner";
 }
 
-<h1>Verify Tickets</h1>
-
-@if (!string.IsNullOrEmpty(Model.StatusMessage))
-{
-    <div class="alert alert-info" role="alert">@Model.StatusMessage</div>
-}
-
-<div>
-    <h4>Tickets</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Ticket.Type)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Ticket.Type)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Ticket.Valid)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Ticket.Valid)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Ticket.Price)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Ticket.Price)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Ticket.Row)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Ticket.Row)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Ticket.SeatNumber)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Ticket.SeatNumber)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Ticket.Screening.Film.Title)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Ticket.Screening.Film.Title)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Ticket.TicketPurchase.User.Name)
-        </dt>
-        <dd class="col-sm-10">
-            @if (Model.Ticket.TicketPurchase != null)
-            {
-                @Html.DisplayFor(m => m.Ticket.TicketPurchase.User.Name)
-            }
-            else
-            {
-                <span>—</span>
-            }
-        </dd>
-    </dl>
-</div>
+<h1>🎫 Ticket Scanner</h1>
 
 <div class="mb-3">
-    <form method="post" asp-page-handler="Verify" asp-route-id="@Model.Ticket?.Id" style="display:inline">
-        <button class="btn btn-primary" type="submit" @(Model.Ticket?.Valid == true ? "" : "disabled")>Verify Ticket</button>
-    </form>
-    <form method="post">
-        <input type="number" asp-for="BevittSzam" />
-        <!-- Ez az OnPostKeres metódust hívja meg -->
-        <button type="submit" asp-page-handler="Keres">Lekérdezés</button>
-
-    </form>
-    <a asp-page="/Cashier/Index" class="btn btn-secondary">Back to Cashier</a>
+    <input type="text" id="scanInput" class="form-control form-control-lg"
+           placeholder="Scan or enter ticket code..."
+           autofocus />
 </div>
+
+<div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" id="autoVerify" checked>
+    <label class="form-check-label">
+        Auto verify
+    </label>
+</div>
+
+<div id="result"></div>
+
+<a asp-page="/Cashier/Index" class="btn btn-secondary mt-3">Back</a>
+
+<script>
+    const input = document.getElementById("scanInput");
+    const result = document.getElementById("result");
+    const autoVerify = document.getElementById("autoVerify");
+
+        input.addEventListener("keypress", function(e) {
+            if (e.key === "Enter") {
+                handleScan();
+            }
+        });
+
+    function handleScan() {
+        const code = input.value.trim();
+        if (!code) return;
+
+        const handler = autoVerify.checked ? "ScanAndVerify" : "Scan";
+
+        fetch(`?handler=${handler}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: "code=" + code
+        })
+        .then(res => res.json())
+        .then(data => {
+            renderResult(data);
+            input.value = "";
+            input.focus();
+        });
+    }
+
+    function renderResult(data) {
+        if (!data.ok) {
+            result.innerHTML = `
+                <div class="alert alert-danger fs-4">
+                    ❌ ${data.message}
+                </div>
+            `;
+            playError();
+            return;
+        }
+
+        let html = `
+            <div class="alert alert-success fs-5">
+                🎟️ ${data.row}. sor, ${data.seat}. szék <br>
+                Type: ${data.type} <br>
+        `;
+
+        if (!autoVerify.checked) {
+            html += `
+                <button class="btn btn-primary mt-2"
+                        onclick="verify(${data.ticketId})">
+                    Verify
+                </button>
+            `;
+        } else {
+            html += `<br><strong>${data.message}</strong>`;
+        }
+
+        html += `</div>`;
+        result.innerHTML = html;
+
+        playSuccess();
+    }
+
+    function verify(id) {
+        fetch(`?handler=Verify&id=${id}`, {
+            method: "POST"
+        })
+        .then(() => location.reload());
+    }
+
+    // 🔊 kis UX boost
+    function playSuccess() {
+        new Audio("https://www.soundjay.com/buttons/sounds/button-3.mp3").play();
+        document.body.style.backgroundColor = "green";
+        setTimeout(() => document.body.style.backgroundColor = "", 500);
+    }
+
+    function playError() {
+        new Audio("https://www.soundjay.com/buttons/sounds/button-10.mp3").play();
+        document.body.style.backgroundColor = "red";
+        setTimeout(() => document.body.style.backgroundColor = "", 500);
+    }
+</script>

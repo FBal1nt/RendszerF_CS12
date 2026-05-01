@@ -1,13 +1,55 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Cashier";
 }
 
-<h3>Cashier</h3>
-<hr />
-<div class="btn-group-vertical" role="group" aria-label="Cashier navigation">
-    <a asp-page="./Sell/Index" class="btn btn-primary">Buy ticket</a>
-    <a asp-page="./TicketVerification" class="btn btn-primary">Verify ticket</a>
+<h2 class="mb-4">💳 Cashier Panel</h2>
+
+<div class="row g-4">
+
+    <!-- Buy Ticket -->
+    <div class="col-md-6">
+        <div class="card shadow h-100 text-center">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <h4 class="card-title">🎟️ Buy Ticket</h4>
+                <p class="card-text">Sell tickets for customers</p>
+                <a asp-page="./Sell/Index" class="btn btn-success btn-lg mt-3">
+                    Go to Sales
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verify Ticket -->
+    <div class="col-md-6">
+        <div class="card shadow h-100 text-center">
+            <div class="card-body d-flex flex-column justify-content-center">
+                <h4 class="card-title">✅ Verify Ticket</h4>
+                <p class="card-text">Scan and validate tickets</p>
+                <a asp-page="./TicketVerification" class="btn btn-primary btn-lg mt-3">
+                    Open Scanner
+                </a>
+            </div>
+        </div>
+    </div>
+
 </div>
 
+<script>
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "1") {
+            window.location.href = "./Sell/Index";
+        }
+        if (e.key === "2") {
+            window.location.href = "./TicketVerification";
+        }
+    });
+</script>
+
+<style>
+    .card:hover {
+        transform: scale(1.03);
+        transition: 0.2s;
+    }
+</style>

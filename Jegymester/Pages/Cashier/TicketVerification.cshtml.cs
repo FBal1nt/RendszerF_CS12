@@ -10,6 +10,7 @@ using JegyMester.DataContext.Entities;
 
 namespace JegyMester.Pages.Cashier
 {
+    [Authorize(Roles = "Cashier")]
     public class VerificationModel : PageModel
     {
         private readonly JegyMesterDbContext _context;
@@ -26,20 +27,23 @@ namespace JegyMester.Pages.Cashier
         [TempData]
         public string? StatusMessage { get; set; }
 
-        [BindProperty]
-        public int BevittSzam { get; set; }
-
         public async Task<IActionResult> OnGetAsync()
         {
-            var ticket =  new Ticket { Id = 0, Price = 0, Row = 0, ScreeningId = 0, SeatNumber = 0, Screening = _context.Screenings.FirstOrDefault(), TicketPurchase = _context.TicketPurchases.FirstOrDefault(), TicketPurchaseId = 0, Type = DataContext.Enums.TicketType.Child, Valid = false };
+            if (!User.IsInRole("Cashier"))
+            {
+                return Forbid();
+            }
 
-            Ticket = ticket;
             return Page();
         }
         
         // Atomic verify + mark-used using conditional UPDATE
         public async Task<IActionResult> OnPostVerifyAsync(int? id)
         {
+            if (!User.IsInRole("Cashier"))
+            {
+                return Forbid();
+            }
             if (id == null) return NotFound();
 
             // Load ticket + screening for business validation (time window)
@@ -64,7 +68,7 @@ namespace JegyMester.Pages.Cashier
 
             if (ticket.Screening is not null)
             {
-                var now = DateTime.Now;
+                var now = DateTime.UtcNow;
                 // Adjust allowed window if needed (e.g., allow 10 minutes before start)
                 if (now < ticket.Screening.StartTime.AddMinutes(-10) || now > ticket.Screening.EndTime.AddMinutes(15))
                 {
@@ -124,20 +128,50 @@ namespace JegyMester.Pages.Cashier
             // If using barcode strings, replace above logic to search by barcode column.
             return new JsonResult(new { ok = false, message = "Unsupported code format" });
         }
-        public async Task<IActionResult> OnPostKeresAsync()
+
+        public async Task<JsonResult> OnPostScanAndVerifyAsync([FromForm] string code)
         {
-            // Példa aszinkron adatbázis lekérdezésre
-            Ticket = await _context.Tickets
+            if (string.IsNullOrWhiteSpace(code))
+                return new JsonResult(new { ok = false, message = "Empty code" });
+
+            if (!int.TryParse(code, out var id))
+                return new JsonResult(new { ok = false, message = "Invalid format" });
+
+            var ticket = await _context.Tickets
                 .Include(t => t.Screening)
-                .ThenInclude(p => p.Film)
-                .Include(t => t.TicketPurchase)
-                .ThenInclude(p => p.User)
-                .FirstOrDefaultAsync(x => x.Id == BevittSzam);
+                .ThenInclude(s => s.Film)
+                .FirstOrDefaultAsync(t => t.Id == id);
 
-            if (Ticket is null)
-                Ticket = new Ticket { Id = 0, Price = 0, Row = 0, ScreeningId = 0, SeatNumber = 0, Screening = _context.Screenings.FirstOrDefault(), TicketPurchase = _context.TicketPurchases.FirstOrDefault(), TicketPurchaseId = 0, Type = DataContext.Enums.TicketType.Child, Valid = false };
+            if (ticket == null)
+                return new JsonResult(new { ok = false, message = "Ticket not found" });
 
-            return Page(); // Maradunk ugyanazon az oldalon
+            if (!ticket.Valid)
+                return new JsonResult(new { ok = false, message = "Already used" });
+
+            var now = DateTime.UtcNow;
+
+            if (ticket.Screening != null &&
+               (now < ticket.Screening.StartTime.AddMinutes(-10) ||
+                now > ticket.Screening.EndTime.AddMinutes(15)))
+            {
+                return new JsonResult(new { ok = false, message = "Invalid time window" });
+            }
+
+            var rows = await _context.Database.ExecuteSqlInterpolatedAsync(
+                $"UPDATE Tickets SET Valid = 0 WHERE Id = {ticket.Id} AND Valid = 1");
+
+            if (rows == 0)
+                return new JsonResult(new { ok = false, message = "Already used (race)" });
+
+            return new JsonResult(new
+            {
+                ok = true,
+                message = "Ticket verified",
+                ticketId = ticket.Id,
+                row = ticket.Row,
+                seat = ticket.SeatNumber,
+                type = ticket.Type.ToString()
+            });
         }
     }
 }
