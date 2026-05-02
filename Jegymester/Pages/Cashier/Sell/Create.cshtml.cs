@@ -1,17 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using JegyMester.DataContext.Context;
+using JegyMester.DataContext.Entities;
+using JegyMester.DataContext.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using JegyMester.DataContext.Context;
-using JegyMester.DataContext.Entities;
-using JegyMester.DataContext.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace JegyMester.Pages.Cashier.Sell_ticket
 {
+    [Authorize(Roles = "Cashier")]
     public class CreateModel : PageModel
     {
         private readonly JegyMesterDbContext _context;
