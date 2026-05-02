@@ -36,6 +36,17 @@
         <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Film.ReleaseDate)
         </dd>
+        <dt class="col-sm-2">Borítókép</dt>
+        <dd class="col-sm-10">
+            @if (!string.IsNullOrEmpty(Model.Film.ImagePath))
+            {
+                <img src="@Model.Film.ImagePath" alt="Borítókép" style="max-height: 200px; border-radius: 8px;" />
+            }
+            else
+            {
+                <span>Nincs feltöltve kép</span>
+            }
+        </dd>
     </dl>
     
     <form method="post">

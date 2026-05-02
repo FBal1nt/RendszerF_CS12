@@ -23,6 +23,7 @@
             <th>
                 @Html.DisplayNameFor(model => model.Film[0].ReleaseDate)
             </th>
+            <th>Kép</th>
             <th></th>
         </tr>
     </thead>
@@ -44,6 +45,16 @@
             <td>
                 @Html.DisplayFor(modelItem => item.ReleaseDate)
             </td>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.ImagePath))
+                    {
+                        <img src="@item.ImagePath" alt="Plakát" style="height: 50px; width: 35px; object-fit: cover; border-radius: 4px;" />
+                    }
+                    else
+                    {
+                        <span class="text-muted small">Nincs kép</span>
+                    }
+                </td>
             <td>
                 <a asp-page="./Edit" asp-route-id="@item.Id" class="link-edit">Edit</a> |
                 <a asp-page="./Details" asp-route-id="@item.Id" class="link-details">Details</a> |

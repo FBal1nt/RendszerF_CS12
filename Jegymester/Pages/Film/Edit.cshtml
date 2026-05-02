@@ -1,13 +1,15 @@
 ﻿@page
 @model JegyMester.Pages.Film.EditModel
 
-<h4>Film</h4>
+<h4>Film Szerkesztése</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Film.Id" />
+            <input type="hidden" asp-for="Film.ImagePath" />
+
             <div class="form-group">
                 <label asp-for="Film.Title" class="control-label"></label>
                 <input asp-for="Film.Title" class="form-control" />
@@ -30,17 +32,30 @@
             </div>
             <div class="form-group">
                 <label asp-for="Film.ReleaseDate" class="control-label"></label>
-                <input asp-for="Film.ReleaseDate" class="form-control" />
+                <input asp-for="Film.ReleaseDate" class="form-control" type="date" />
                 <span asp-validation-for="Film.ReleaseDate" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
+
+            @if (!string.IsNullOrEmpty(Model.Film.ImagePath))
+            {
+                <div class="form-group mt-2">
+                    <label>Jelenlegi borítókép:</label><br />
+                    <img src="@Model.Film.ImagePath" alt="Borítókép" style="max-height: 150px; border-radius: 5px;" />
+                </div>
+            }
+
+            <div class="form-group mt-2">
+                <label class="control-label">Új borítókép feltöltése (opcionális)</label>
+                <input type="file" name="ImageUpload" class="form-control" accept="image/*" />
+            </div>
+
+            <div class="form-group mt-3">
+                <input type="submit" value="Mentés" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
-<div>
+<div class="mt-2">
     <a asp-page="/AdminIndex">Vissza az Admin oldalra</a>
 </div>
-

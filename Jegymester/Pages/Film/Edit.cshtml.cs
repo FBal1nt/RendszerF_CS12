@@ -1,12 +1,15 @@
 ﻿using JegyMester.DataContext.Context;
 using JegyMester.DataContext.Enums;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using FilmEntity = JegyMester.DataContext.Entities.Film;
@@ -16,15 +19,20 @@ namespace JegyMester.Pages.Film
     [Authorize(Roles = "Admin")]
     public class EditModel : PageModel
     {
-        private readonly JegyMester.DataContext.Context.JegyMesterDbContext _context;
+        private readonly JegyMesterDbContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public EditModel(JegyMester.DataContext.Context.JegyMesterDbContext context)
+        public EditModel(JegyMesterDbContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
         [BindProperty]
         public FilmEntity Film { get; set; } = default!;
+
+        [BindProperty]
+        public IFormFile? ImageUpload { get; set; }
 
         public SelectList GenreSelectList { get; set; } = default!;
 
@@ -35,7 +43,7 @@ namespace JegyMester.Pages.Film
                 return NotFound();
             }
 
-            var film =  await _context.Films.FirstOrDefaultAsync(m => m.Id == id);
+            var film = await _context.Films.FirstOrDefaultAsync(m => m.Id == id);
             if (film == null)
             {
                 return NotFound();
@@ -53,6 +61,31 @@ namespace JegyMester.Pages.Film
             {
                 PopulateGenreSelectList();
                 return Page();
+            }
+
+            if (ImageUpload != null)
+            {
+                if (!string.IsNullOrEmpty(Film.ImagePath))
+                {
+                    string oldFilePath = Path.Combine(_environment.WebRootPath, Film.ImagePath.TrimStart('/'));
+                    if (System.IO.File.Exists(oldFilePath))
+                    {
+                        System.IO.File.Delete(oldFilePath);
+                    }
+                }
+
+                string uploadsFolder = Path.Combine(_environment.WebRootPath, "images", "films");
+                Directory.CreateDirectory(uploadsFolder);
+
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + ImageUpload.FileName;
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await ImageUpload.CopyToAsync(fileStream);
+                }
+
+                Film.ImagePath = "/images/films/" + uniqueFileName;
             }
 
             _context.Attach(Film).State = EntityState.Modified;
