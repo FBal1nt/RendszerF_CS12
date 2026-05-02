@@ -233,7 +233,7 @@ else
             </div>
         }
 
-        <button type="submit" class="btn btn-primary w-100" id="submitBtn" disabled>
+        <button type="submit" class="btn btn-primary w-100 mb-5" id="submitBtn" disabled>
             Válassz legalább egy helyet!
         </button>
     </form>
@@ -295,35 +295,41 @@ else
             jsonInput.value = JSON.stringify(selectedTickets);
         } *@
 
-        function updateUI() {
-    const list = document.getElementById("selectedSeatsList");
-    const btn = document.getElementById("submitBtn");
-    const jsonInput = document.getElementById("selectedTicketsJson");
+                function updateUI() {
+            const list = document.getElementById("selectedSeatsList");
+            const btn = document.getElementById("submitBtn");
+            const jsonInput = document.getElementById("selectedTicketsJson");
 
-    if (selectedTickets.length === 0) {
-        list.innerHTML = '<li class="list-group-item text-muted">Nincs választott hely.</li>';
-        btn.disabled = true;
-        btn.innerText = "Válassz legalább egy helyet!";
-    } else {
-        // Itt a változás: hozzáadunk egy törlés gombot (btn-outline-danger)
-        list.innerHTML = selectedTickets.map((t, index) => 
-            `<li class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                    <strong>${t.row}. sor, ${t.column}. szék</strong> <br/>
-                    <small class="text-muted">${t.type} - ${t.price} Ft</small>
-                </div>
-                <button type="button" class="btn btn-outline-danger btn-sm" onclick="removeSeat(${t.seatNumber})">
-                    <i class="bi bi-trash"></i> Törlés
-                </button>
-            </li>`
-        ).join("");
-        
-        const total = selectedTickets.reduce((sum, t) => sum + t.price, 0);
-        btn.disabled = false;
-        btn.innerText = `${selectedTickets.length} jegy megvétele (${total} Ft)`;
-    }
-    jsonInput.value = JSON.stringify(selectedTickets);
-}
+            if (selectedTickets.length === 0) {
+                list.innerHTML = '<li class="list-group-item text-muted">Nincs választott hely.</li>';
+                btn.disabled = true;
+                btn.innerText = "Válassz legalább egy helyet!";
+            } else {
+                list.innerHTML = selectedTickets.map((t, index) => {
+                    const options = Object.keys(prices).map(type =>
+                        `<option value="${type}" ${t.type === type ? 'selected' : ''}>${type} (${prices[type]} Ft)</option>`
+                    ).join("");
+
+                    return `
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div class="w-75">
+                            <strong>${t.row}. sor, ${t.column}. szék</strong> <br/>
+                            <select class="form-select form-select-sm mt-1" onchange="changeTicketType(${t.seatNumber}, this.value)">
+                                ${options}
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-outline-danger btn-sm ms-2" onclick="removeSeat(${t.seatNumber})">
+                            <i class="bi bi-trash"></i> Törlés
+                        </button>
+                    </li>`;
+                }).join("");
+
+                const total = selectedTickets.reduce((sum, t) => sum + t.price, 0);
+                btn.disabled = false;
+                btn.innerText = `${selectedTickets.length} jegy megvétele (${total} Ft)`;
+            }
+            jsonInput.value = JSON.stringify(selectedTickets);
+        }
 
 // Új függvény a listából való törléshez
 function removeSeat(seatNumber) {
@@ -339,5 +345,14 @@ function removeSeat(seatNumber) {
     // 3. Frissítjük a felületet
     updateUI();
 }
+
+        function changeTicketType(seatNumber, newType) {
+            const ticket = selectedTickets.find(t => t.seatNumber === seatNumber);
+            if (ticket) {
+                ticket.type = newType;
+                ticket.price = prices[newType];
+                updateUI();
+            }
+        }
     </script>
 }
