@@ -175,5 +175,37 @@ namespace JegyMester.Pages.Cashier
                 type = ticket.Type.ToString()
             });
         }
+
+        public async Task<JsonResult> OnPostSearchAsync([FromForm] string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return new JsonResult(new { ok = false, message = "Empty search" });
+
+            query = query.Trim().ToLower();
+
+            var tickets = await _context.Tickets
+                .Include(t => t.TicketPurchase)
+                .ThenInclude(p => p.User)
+                .Include(t => t.Screening)
+                .Where(t =>
+                    t.TicketPurchase.User.Email.ToLower().Contains(query) ||
+                    t.TicketPurchase.User.Name.ToLower().Contains(query))
+                .Select(t => new
+                {
+                    id = t.Id,
+                    email = t.TicketPurchase.User.Email,
+                    name = t.TicketPurchase.User.Name,
+                    valid = t.Valid,
+                    row = t.Row,
+                    seat = t.SeatNumber,
+                    type = t.Type.ToString(),
+                    film = t.Screening.Film.Title
+                })
+                .Take(50)
+                .ToListAsync();
+
+            return new JsonResult(new { ok = true, tickets });
+        }
     }
+
 }
