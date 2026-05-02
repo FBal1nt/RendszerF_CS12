@@ -27,6 +27,13 @@ public class LoginModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
+        // Üres mezők tiltása
+        if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
+        {
+            ErrorMessage = "Email és jelszó megadása kötelező.";
+            return Page();
+        }
+
         var user = await _db.Users
             .Include(u => u.Roles)
             .FirstOrDefaultAsync(u => u.Email == Email);
@@ -37,14 +44,25 @@ public class LoginModel : PageModel
             return Page();
         }
 
+        // NULL PasswordHash elleni védelem
+        if (string.IsNullOrWhiteSpace(user.PasswordHash))
+        {
+            ErrorMessage = "A felhasználó jelszava hibásan van tárolva.";
+            return Page();
+        }
+
+        // Jelszó ellenőrzés
         if (!BCrypt.Net.BCrypt.Verify(Password, user.PasswordHash))
         {
             ErrorMessage = "Hibás email vagy jelszó.";
             return Page();
         }
 
+
+        // JWT token generálása
         var token = GenerateJwtToken(user);
 
+        // Token cookie-ba tétele
         HttpContext.Response.Cookies.Append("auth_token", token, new CookieOptions
         {
             HttpOnly = true,
@@ -53,7 +71,7 @@ public class LoginModel : PageModel
             Expires = DateTimeOffset.UtcNow.AddHours(3)
         });
 
-        // Cookie-ba is több szerep
+        // Cookie authentikáció claims
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -65,6 +83,7 @@ public class LoginModel : PageModel
             claims.Add(new Claim(ClaimTypes.Role, role.Name));
         }
 
+        // Cookie-ba bejelentkeztetés
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
             new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme))
@@ -75,16 +94,19 @@ public class LoginModel : PageModel
 
     private string GenerateJwtToken(User user)
     {
-        var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+        var keyString = _config["Jwt:Key"];
 
+        if (string.IsNullOrWhiteSpace(keyString))
+            throw new Exception("JWT kulcs NULL vagy üres! A konfiguráció nem töltődött be.");
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(keyString));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email)
-        };
+    {
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new Claim(ClaimTypes.Email, user.Email)
+    };
 
         foreach (var role in user.Roles)
         {
@@ -101,4 +123,5 @@ public class LoginModel : PageModel
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
 }
