@@ -1,35 +1,120 @@
 @page
 @model JegyMester.Pages.VetitesekListaModel
 
-<h3>VETITÉSEK</h3>
-<hr />
+<div class="container py-4">
+    <h3 class="mb-4 text-white">VETÍTÉSEK</h3>
+    <hr class="border-white mb-4" style="opacity: 0.2;" />
 
-@if (Model.Vetitesek?.Any() != true)
-{
-    <p>Nincsenek vetítések a listában.</p>
-}
-else
-{
-    <ul class="list-group">
-        @foreach (var v in Model.Vetitesek)
-        {
-            <li class="list-group-item">
-                <div class="fw-bold">@v.Film?.Title</div>
-                <div class="text-muted small">
-                    Mozi: @(v.Room?.Cinema != null ? v.Room.Cinema.Name : "Ismeretlen")<br />
-                    Terem: @(v.Room != null ? v.Room.RoomNumber.ToString() : "Ismeretlen")<br />
-                    Kezdés: @v.StartTime.ToString("yyyy.MM.dd. HH:mm")<br />
-                    Befejezés: @v.EndTime.ToString("yyyy.MM.dd. HH:mm")
+    <!-- FEHÉR SZŰRŐ SÁV -->
+    <div class="card mb-5 border-0 shadow-sm bg-white rounded-3">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-center">
+                <div class="col-auto">
+                    <label class="fw-bold text-dark"><i class="bi bi-funnel"></i> Szűrés:</label>
                 </div>
 
-                <div class="mt-2">
-                    <a asp-page="/Tickets/Buy"
-                           asp-route-id="@v.Id"
-                           class="btn btn-success btn-sm">
-                        Jegyvásárlás
-                    </a>
+                <!-- Mozi szűrő -->
+                <div class="col-md-4">
+                    <select asp-for="SelectedCinemaId" class="form-select border shadow-sm" onchange="this.form.submit()">
+                        <option value="">-- Összes mozi --</option>
+                        @foreach (var cinema in Model.Cinemas)
+                        {
+                            <option value="@cinema.Id">@cinema.Name</option>
+                        }
+                    </select>
                 </div>
-            </li>
+
+                <!-- Dátum szűrő -->
+                <div class="col-md-4">
+                    <input type="date" asp-for="SelectedDate" class="form-control border shadow-sm" onchange="this.form.submit()" />
+                </div>
+
+                <div class="col-auto ms-auto">
+                    <a asp-page="/VetitesekLista" class="btn btn-outline-dark btn-sm rounded-pill px-3">Szűrés törlése</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Üzenetek megjelenítése (pl. sikeres vásárlás) -->
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success shadow-sm rounded-3">
+            @TempData["Message"]
+        </div>
+    }
+
+    <!-- VETÍTÉSEK LISTÁZÁSA KÁRTYÁKKAL -->
+    @if (Model.Vetitesek?.Any() != true)
+    {
+        <div class="alert alert-warning text-center py-5 shadow-sm rounded-3">
+            <h4>Nincs elérhető vetítés</h4>
+            <p class="mb-0">A megadott feltételekkel jelenleg nem találtunk jövőbeli időpontot.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
+            @foreach (var v in Model.Vetitesek)
+            {
+                <div class="col">
+                    <div class="card h-100 border-0 shadow-sm vetites-card bg-white text-dark">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold border-bottom pb-2 mb-3">@v.Film?.Title</h5>
+
+                            <div class="mb-4 flex-grow-1">
+                                <p class="mb-1"><i class="bi bi-building text-secondary"></i> <strong>Mozi:</strong> @(v.Room?.Cinema != null ? v.Room.Cinema.Name : "Ismeretlen")</p>
+                                <p class="mb-1"><i class="bi bi-door-open text-secondary"></i> <strong>Terem:</strong> @(v.Room != null ? v.Room.RoomNumber.ToString() : "Ismeretlen")</p>
+                                <p class="mb-1"><i class="bi bi-calendar-event text-secondary"></i> <strong>Dátum:</strong> @v.StartTime.ToString("yyyy. MM. dd.")</p>
+                                <p class="mb-0"><i class="bi bi-clock text-secondary"></i> <strong>Idő:</strong> @v.StartTime.ToString("HH:mm") - @v.EndTime.ToString("HH:mm")</p>
+                            </div>
+
+                            <div class="mt-auto">
+                                <a asp-page="/Tickets/Buy" asp-route-id="@v.Id" class="btn btn-dark w-100 rounded-pill vetites-btn fw-bold">
+                                    Jegyvásárlás
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- STÍLUSOK (Beteheted a site.css-be is) -->
+<style>
+    /* Kártyák hover effektje */
+    .vetites-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 15px;
+    }
+
+        .vetites-card:hover {
+            transform: translateY(-8px);
+            /* Finom kék árnyék hoverkor */
+            box-shadow: 0 15px 25px rgba(25, 208, 255, 0.2) !important;
         }
-    </ul>
-}
+
+    /* Jegyvásárlás gomb hover kékre vált (#19d0ff) */
+    .vetites-btn {
+        transition: all 0.3s ease;
+        border: 2px solid #000;
+    }
+
+        .vetites-btn:hover {
+            background-color: #19d0ff;
+            border-color: #19d0ff;
+            color: #ffffff !important; /* A szöveg itt marad fehér */
+        }
+
+    /* Űrlap elemek fókusza a szűrő sávban */
+    .form-select, .form-control {
+        border-radius: 10px;
+    }
+
+        .form-select:focus, .form-control:focus {
+            border-color: #19d0ff !important;
+            box-shadow: 0 0 0 0.25rem rgba(25, 208, 255, 0.25);
+        }
+</style>

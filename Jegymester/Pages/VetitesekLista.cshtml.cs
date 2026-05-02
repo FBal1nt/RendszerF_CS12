@@ -4,10 +4,8 @@ using JegyMester.DataContext.Enums;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using JegyMester.DataContext.Entities;
 using ScreeningEntity = JegyMester.DataContext.Entities.Screening;
+using CinemaEntity = JegyMester.DataContext.Entities.Cinema;
 
 namespace JegyMester.Pages
 {
@@ -22,13 +20,37 @@ namespace JegyMester.Pages
 
         public IList<ScreeningEntity> Vetitesek { get; set; } = new List<ScreeningEntity>();
 
+        public IList<CinemaEntity> Cinemas { get; set; } = new List<CinemaEntity>();
+
+        [BindProperty(SupportsGet = true)]
+        public int? SelectedCinemaId { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public DateTime? SelectedDate { get; set; }
+
         public async Task OnGetAsync()
         {
-            Vetitesek = await _context.Screenings
+            Cinemas = await _context.Cinemas.OrderBy(c => c.Name).ToListAsync();
+
+            var query = _context.Screenings
                 .Include(s => s.Film)
                 .Include(s => s.Room)
                     .ThenInclude(r => r.Cinema)
-                .Where(s => s.StartTime > DateTime.Now) // Csak a jövőbeli vetítések
+                .Where(s => s.StartTime > DateTime.Now);
+
+            if (SelectedCinemaId.HasValue)
+            {
+                query = query.Where(s => s.Room.CinemaId == SelectedCinemaId.Value);
+            }
+
+            if (SelectedDate.HasValue)
+            {
+                query = query.Where(s => s.StartTime.Date == SelectedDate.Value.Date);
+            }
+
+            Vetitesek = await query
+                .OrderBy(s => s.Film.Title)
+                .ThenBy(s => s.StartTime)
                 .ToListAsync();
         }
 
@@ -48,7 +70,6 @@ namespace JegyMester.Pages
             if (screening == null)
                 return NotFound();
 
-            // 1) Létrehozzuk a vásárlást
             var purchase = new TicketPurchase
             {
                 UserId = userId,
@@ -56,9 +77,7 @@ namespace JegyMester.Pages
             };
 
             _context.TicketPurchases.Add(purchase);
-            await _context.SaveChangesAsync(); // kell, hogy legyen purchase.Id
-
-            // 2) Létrehozunk egy jegyet
+            await _context.SaveChangesAsync();
 
             var ticket = new DataContext.Entities.Ticket
             {
@@ -77,7 +96,5 @@ namespace JegyMester.Pages
             TempData["Message"] = "Sikeres jegyvásárlás!";
             return RedirectToPage();
         }
-
-
     }
 }
