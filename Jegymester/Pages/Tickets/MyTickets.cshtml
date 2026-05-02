@@ -47,7 +47,11 @@ else
                     Időpont: @(t.Screening?.StartTime.ToString("yyyy.MM.dd. HH:mm") ?? "-")<br />
                     Mozi: @(t.Screening?.Room?.Cinema?.Name ?? "-") <br />
                     Terem: @(t.Screening?.Room?.RoomNumber.ToString() ?? "-")<br />
-                    Sor: @t.Row, Szék: @t.SeatNumber<br />
+                    @{
+                        int spr = t.Screening?.Room?.SeatsPerRow ?? 0;
+                        int seat = (spr == 0) ? t.SeatNumber : (t.SeatNumber % spr == 0 ? spr : t.SeatNumber % spr);
+                    }
+                    Sor: @t.Row, Szék: @seat<br />
                     Típus: @t.Name<br />
                     Ár: @t.Price Ft<br />
 
