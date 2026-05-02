@@ -1,40 +1,34 @@
 ﻿@page
 @model JegyMester.Pages.Screening.DeleteModel
 
-<h3>Are you sure you want to delete this?</h3>
+<h3>Biztosan törölni szeretnéd ezt a vetítést?</h3>
 <div>
     <h4>Screening</h4>
     <hr />
     <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Screening.StartTime)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Screening.StartTime)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Screening.EndTime)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Screening.EndTime)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Screening.Room)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Screening.Room.RoomNumber)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Screening.Film)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Screening.Film.Director)
-        </dd>
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Screening.StartTime)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Screening.StartTime)</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Screening.EndTime)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Screening.EndTime)</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Screening.Room)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Screening.Room.RoomNumber)</dd>
+
+        <dt class="col-sm-2">@Html.DisplayNameFor(model => model.Screening.Film)</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Screening.Film.Director)</dd>
     </dl>
-    
+
     <form method="post">
         <input type="hidden" asp-for="Screening.Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-page="./Index">Back to List</a>
+
+        <div class="form-group mb-4 mt-3">
+            <label asp-for="CancellationReason" class="control-label fw-bold text-danger">Törlés indoka:</label>
+            <textarea asp-for="CancellationReason" class="form-control border-danger" rows="3" placeholder="Pl.: Technikai hiba miatt elmarad. A jegyek árát visszatérítjük..."></textarea>
+            <span asp-validation-for="CancellationReason" class="text-danger fw-bold"></span>
+        </div>
+
+        <input type="submit" value="Törlés" class="btn btn-danger" /> |
+        <a asp-page="./Index">Vissza a listához</a>
     </form>
 </div>

@@ -27,9 +27,10 @@ namespace JegyMester.DataContext.Entities
         public decimal Price { get; set; }
         public int Row { get; set; }
         public int SeatNumber { get; set; }
-        public int ScreeningId { get; set; }
+        public int? ScreeningId { get; set; }
         public Screening? Screening { get; set; }
         public int TicketPurchaseId { get; set; }
         public TicketPurchase? TicketPurchase { get; set; }
+        public string? CancellationReason { get; set; }
     }
 }

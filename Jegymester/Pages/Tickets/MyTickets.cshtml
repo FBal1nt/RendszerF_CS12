@@ -32,21 +32,29 @@ else
             @foreach (var t in purchase.Tickets)
             {
                 <li class="list-group-item">
-                    <strong>@t.Screening.Film.Title</strong><br />
-                    Időpont: @t.Screening.StartTime.ToString("yyyy.MM.dd. HH:mm")<br />
-                    Mozi: @t.Screening.Room.Cinema.Name <br />
-                    Terem: @t.Screening.Room.RoomNumber<br />
+
+                    <!-- Ha van törlési indok, kiemelve megjelenítjük -->
+                    @if (!string.IsNullOrEmpty(t.CancellationReason))
+                    {
+                        <div class="alert alert-danger mb-2 p-2">
+                            <strong><i class="bi bi-exclamation-triangle"></i> Sajnáljuk, ezt a vetítést törölték!</strong><br />
+                            Indok: @t.CancellationReason
+                        </div>
+                    }
+
+                    <!-- Fontos a ?. és a ?? használata, mert ha a Screening törölve lett, az null lesz! -->
+                    <strong>@(t.Screening?.Film?.Title ?? "Törölt (Részletek már nem elérhetők)")</strong><br />
+                    Időpont: @(t.Screening?.StartTime.ToString("yyyy.MM.dd. HH:mm") ?? "-")<br />
+                    Mozi: @(t.Screening?.Room?.Cinema?.Name ?? "-") <br />
+                    Terem: @(t.Screening?.Room?.RoomNumber.ToString() ?? "-")<br />
                     Sor: @t.Row, Szék: @t.SeatNumber<br />
                     Típus: @t.Name<br />
                     Ár: @t.Price Ft<br />
 
                     <form method="post" asp-page-handler="Delete" asp-route-ticketId="@t.Id" style="display:inline;">
-                        <button type="submit" class="btn btn-danger btn-sm mt-2">Törlés</button>
+                        <button type="submit" class="btn btn-outline-danger btn-sm mt-2">Jegy törlése a profilomból</button>
                     </form>
                 </li>
-
-                
-
             }
         </ul>
     }
