@@ -1,16 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using JegyMester.DataContext.Context;
+using JegyMester.DataContext.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using JegyMester.DataContext.Context;
-using JegyMester.DataContext.Entities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace JegyMester.DataContext.Pages
 {
+    [Authorize(Roles = "Admin")]
     public class EditModel : PageModel
     {
         private readonly JegyMester.DataContext.Context.JegyMesterDbContext _context;

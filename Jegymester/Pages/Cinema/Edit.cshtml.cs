@@ -1,16 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using JegyMester.DataContext.Context;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using JegyMester.DataContext.Context;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using CinemaEntity = JegyMester.DataContext.Entities.Cinema;
 
 namespace JegyMester.Pages.Cinema
 {
+    [Authorize(Roles = "Admin")]
     public class EditModel : PageModel
     {
         private readonly JegyMester.DataContext.Context.JegyMesterDbContext _context;

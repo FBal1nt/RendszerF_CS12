@@ -1,14 +1,16 @@
+using JegyMester.DataContext.Context;
+using JegyMester.DataContext.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using JegyMester.DataContext.Context;
-using JegyMester.DataContext.Entities;
+using CinemaEntity = JegyMester.DataContext.Entities.Cinema;
 using FilmEntity = JegyMester.DataContext.Entities.Film;
 using ScreeningEntity = JegyMester.DataContext.Entities.Screening;
-using CinemaEntity = JegyMester.DataContext.Entities.Cinema;
 
 namespace JegyMester.Pages
 {
+    [Authorize(Roles = "Admin")]
     public class ScreeningListByFilmModel : PageModel
     {
         private readonly JegyMesterDbContext _context;

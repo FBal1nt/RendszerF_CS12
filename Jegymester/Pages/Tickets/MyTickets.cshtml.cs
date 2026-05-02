@@ -22,39 +22,27 @@ namespace JegyMester.Pages.Tickets
 
         public async Task<IActionResult> OnGetAsync()
         {
-            // 🔥 User ID a JWT tokenből
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null)
-                return RedirectToPage("/Login");
-
-            int userId = int.Parse(userIdClaim);
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
             Purchases = await _context.TicketPurchases
-            .Where(tp => tp.UserId == userId)
-            .Include(tp => tp.Tickets)
-                .ThenInclude(t => t.Screening)
-                    .ThenInclude(s => s.Film)
-            .Include(tp => tp.Tickets)
-                .ThenInclude(t => t.Screening)
-                    .ThenInclude(s => s.Room)
-                        .ThenInclude(r => r.Cinema)
-            .OrderByDescending(tp => tp.PurchaseDateTime)
-            .ToListAsync();
-
+                .Where(tp => tp.UserId == userId)
+                .Include(tp => tp.Tickets)
+                    .ThenInclude(t => t.Screening)
+                        .ThenInclude(s => s.Film)
+                .Include(tp => tp.Tickets)
+                    .ThenInclude(t => t.Screening)
+                        .ThenInclude(s => s.Room)
+                            .ThenInclude(r => r.Cinema)
+                .OrderByDescending(tp => tp.PurchaseDateTime)
+                .ToListAsync();
 
             return Page();
         }
 
         public async Task<IActionResult> OnPostDeleteAsync(int ticketId)
         {
-            // 🔥 User ID a JWT tokenből
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null)
-                return RedirectToPage("/Login");
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            int userId = int.Parse(userIdClaim);
-
-            // Jegy betöltése
             var ticket = await _context.Tickets
                 .Include(t => t.Screening)
                 .Include(t => t.TicketPurchase)
@@ -66,25 +54,21 @@ namespace JegyMester.Pages.Tickets
                 return RedirectToPage();
             }
 
-            // 🔥 Csak a saját jegy törölhető
             if (ticket.TicketPurchase.UserId != userId)
             {
                 TempData["Error"] = "Nincs jogosultságod a jegy törléséhez.";
                 return RedirectToPage();
             }
 
-            // 🔥 4 órás szabály
             if (DateTime.Now > ticket.Screening.StartTime.AddHours(-4))
             {
                 TempData["Error"] = "A jegy már nem törölhető (kevesebb mint 4 óra van hátra).";
                 return RedirectToPage();
             }
 
-            // Jegy törlése
             _context.Tickets.Remove(ticket);
             await _context.SaveChangesAsync();
 
-            // Ha a vásárlásban már nincs jegy → töröljük a TicketPurchase-t is
             var remaining = await _context.Tickets
                 .CountAsync(t => t.TicketPurchaseId == ticket.TicketPurchaseId);
 

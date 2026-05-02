@@ -1,16 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using JegyMester.DataContext.Context;
+using JegyMester.DataContext.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using JegyMester.DataContext.Context;
-using JegyMester.DataContext.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using FilmEntity = JegyMester.DataContext.Entities.Film;
 
 namespace JegyMester.Pages.Film
 {
+    [Authorize(Roles = "Admin")]
     public class CreateModel : PageModel
     {
         private readonly JegyMester.DataContext.Context.JegyMesterDbContext _context;

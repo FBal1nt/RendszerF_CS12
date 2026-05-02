@@ -7,7 +7,9 @@
         <p style="color:white">Foglalj helyet a legjobb filmekre, gyorsan és egyszerűen.</p>
     </div>
 
-    <div class="row g-4">
+    <!-- Kártyák középre igazítása -->
+    <div class="row g-4 justify-content-center">
+
         <!-- Filmek -->
         <div class="col-md-4">
             <div class="card h-100 menu-card">
@@ -32,16 +34,20 @@
             </div>
         </div>
 
-        <!-- Jegyeim -->
-        <div class="col-md-4">
-            <div class="card h-100 menu-card">
-                <div class="card-body text-center">
-                    <h3 class="card-title">
-                        <a href="/Tickets/MyTickets" class="stretched-link text-decoration-none">🎫 Jegyeim</a>
-                    </h3>
-                    <p class="card-text">Korábbi vásárlásaid egy helyen.</p>
+        <!-- Jegyeim – csak bejelentkezve -->
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div class="col-md-4">
+                <div class="card h-100 menu-card">
+                    <div class="card-body text-center">
+                        <h3 class="card-title">
+                            <a href="/Tickets/MyTickets" class="stretched-link text-decoration-none">🎫 Jegyeim</a>
+                        </h3>
+                        <p class="card-text">Korábbi vásárlásaid egy helyen.</p>
+                    </div>
                 </div>
             </div>
-        </div>
+        }
+
     </div>
 </div>
