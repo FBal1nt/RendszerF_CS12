@@ -39,11 +39,13 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
             var q = _context.TicketPurchases
                 .Include(tp => tp.Tickets)
                     .ThenInclude(t => t.Screening)
+                        .ThenInclude(s => s.Film)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(Search))
             {
-                if (Search.Contains("@"))
+                // allow searching by user id or purchase id
+                if (Search.Contains("@") && Search.Length >= 3)
                 {
                     var user = _context.Users
                         .FirstOrDefault(f => f.Email.Contains(Search));
@@ -85,6 +87,8 @@ namespace JegyMester.Pages.Cashier.Sell_ticket
             {
                 var purchase = await _context.TicketPurchases
                     .Include(tp => tp.Tickets)
+                        .ThenInclude(t => t.Screening)
+                            .ThenInclude(s => s.Film)
                     .FirstOrDefaultAsync(tp => tp.Id == id);
 
                 if (purchase == null)

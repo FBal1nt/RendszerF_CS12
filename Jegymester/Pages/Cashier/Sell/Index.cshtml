@@ -1,4 +1,5 @@
 ﻿@page
+@using JegyMester.DataContext.Entities
 @model JegyMester.Pages.Cashier.Sell_ticket.IndexModel
 
 @{
@@ -33,33 +34,98 @@
     </div>
 </form>
 
-<table class="table table-sm">
-    <thead>
-        <tr>
-            <th>Id</th>
-            <th>When</th>
-            <th>User</th>
-            <th>Tickets</th>
-            <th>Total</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var p in Model.TicketPurchases) {
-        <tr>
-            <td>@p.Id</td>
-            <td>@p.PurchaseDateTime.ToLocalTime().ToString("g")</td>
-            <td>@p.UserId</td>
-            <td>@p.Tickets?.Count() ?? 0</td>
-            <td>@p.TotalPrice.ToString("C")</td>
-            <td>
-                <a asp-page="./Details" asp-route-id="@p.Id" class="btn btn-sm btn-outline-primary">Details</a>
-                <a asp-page="./Edit" asp-route-id="@p.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
-                <form method="post" asp-page-handler="Revert" asp-route-id="@p.Id" style="display:inline" onsubmit="return confirm('Revert purchase and free seats?');">
-                    <button type="submit" class="btn btn-sm btn-danger">Revert</button>
-                </form>
-            </td>
-        </tr>
+@foreach (var p in Model.TicketPurchases)
+{
+    <div class="card mb-2">
+        <div class="card-header d-flex justify-content-between align-items-center">
+
+            <div>
+                <b>Purchase #@p.Id</b> — @p.PurchaseDateTime.ToLocalTime().ToString("g")
+                <br />
+                User: @p.UserId
+            </div>
+
+            <div class="text-end">
+                <div class="mb-1">
+                    💰 @p.TotalPrice.ToString("C")
+                </div>
+
+                <!-- ACTION BUTTONS -->
+                <div class="btn-group btn-group-sm">
+
+                    <a asp-page="./Details"
+                       asp-route-id="@p.Id"
+                       class="btn btn-outline-primary">
+                        Details
+                    </a>
+
+                    <a asp-page="./Edit"
+                       asp-route-id="@p.Id"
+                       class="btn btn-outline-secondary">
+                        Edit
+                    </a>
+
+                    <form method="post"
+                          asp-page-handler="Revert"
+                          asp-route-id="@p.Id"
+                          onsubmit="return confirm('Revert purchase and free seats?');"
+                          class="d-inline">
+                        <button type="submit" class="btn btn-outline-danger">
+                            Revert
+                        </button>
+                    </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <p>Tickets: @(p.Tickets?.Count ?? 0)</p>
+
+                <button class="btn btn-sm btn-outline-primary"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#tickets-@p.Id">
+                    Show tickets
+                </button>
+
+            <div class="collapse mt-2" id="tickets-@p.Id">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Ticket ID</th>
+                                <th>Film</th>
+                                <th>Seat</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var t in p.Tickets ?? Enumerable.Empty<Ticket>())
+                            {
+                                <tr>
+                                    <td>@t.Id</td>
+                                <td class="text-truncate" style="max-width: 200px;">
+                                    @t.Screening?.Film?.Title
+                                </td>
+                                    <td>
+                                        <span class="badge bg-dark">
+                                            @t.Row/@t.SeatNumber
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (t.Valid)
+                                        {
+                                            <span class="badge bg-success">VALID</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">USED</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 }
-    </tbody>
-</table>
