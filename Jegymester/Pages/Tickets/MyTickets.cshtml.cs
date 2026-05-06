@@ -60,6 +60,14 @@ namespace JegyMester.Pages.Tickets
                 return RedirectToPage();
             }
 
+            // Ha a vetítés törölve lett → ne lehessen törölni
+            if (ticket.Screening == null)
+            {
+                TempData["Error"] = "Ez a jegy már nem törölhető, mert a vetítés törölve lett.";
+                return RedirectToPage();
+            }
+
+            // 4 órás szabály
             if (DateTime.Now > ticket.Screening.StartTime.AddHours(-4))
             {
                 TempData["Error"] = "A jegy már nem törölhető (kevesebb mint 4 óra van hátra).";
@@ -81,5 +89,6 @@ namespace JegyMester.Pages.Tickets
             TempData["Message"] = "A jegy sikeresen törölve lett.";
             return RedirectToPage();
         }
+
     }
 }

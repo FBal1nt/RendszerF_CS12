@@ -23,6 +23,7 @@ namespace JegyMester.Pages.Room
 
         [BindProperty]
         public RoomEntity Room { get; set; } = default!;
+        public string? DeleteErrorMessage { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -46,19 +47,29 @@ namespace JegyMester.Pages.Room
         public async Task<IActionResult> OnPostAsync(int? id)
         {
             if (id == null)
-            {
                 return NotFound();
+
+            var room = await _context.Rooms
+                .Include(r => r.Screenings)
+                .Include(r => r.Cinema)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (room == null)
+                return NotFound();
+
+            // Ha van vetítés → nem törölhető
+            if (room.Screenings.Any())
+            {
+                DeleteErrorMessage = "A terem nem törölhető, mert léteznek hozzá vetítések.";
+                Room = room; // fontos: visszatöltjük, hogy a Delete oldal meg tudja jeleníteni
+                return Page(); // nem redirect
             }
 
-            var room = await _context.Rooms.FindAsync(id);
-            if (room != null)
-            {
-                Room = room;
-                _context.Rooms.Remove(Room);
-                await _context.SaveChangesAsync();
-            }
+            _context.Rooms.Remove(room);
+            await _context.SaveChangesAsync();
 
             return RedirectToPage("./Index");
         }
+
     }
 }
