@@ -21,6 +21,15 @@ public class RegisterModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
+        // Üres mezők tiltása
+        if (string.IsNullOrWhiteSpace(Email) ||
+            string.IsNullOrWhiteSpace(Password) ||
+            string.IsNullOrWhiteSpace(ConfirmPassword))
+        {
+            ErrorMessage = "Minden mező kitöltése kötelező.";
+            return Page();
+        }
+
         if (Password != ConfirmPassword)
         {
             ErrorMessage = "A jelszavak nem egyeznek.";
@@ -36,7 +45,7 @@ public class RegisterModel : PageModel
             return Page();
         }
 
-        // 🔥 Jelszó hash-elése BCrypt-tel
+        // Jelszó hash-elése
         var hashed = BCrypt.Net.BCrypt.HashPassword(Password);
 
         var user = new User
@@ -50,4 +59,5 @@ public class RegisterModel : PageModel
 
         return RedirectToPage("/Login");
     }
+
 }
